@@ -78,7 +78,18 @@
     font-size: 0; color: transparent;
     transition: width 200ms ease, height 200ms ease, background-color 280ms ease, font-size 200ms ease, color 200ms ease;
   }
-  .tab .t { font-weight: 700; font-size: 14px; line-height: 1.25; color: var(--ink-side-faint); }
+  .tab .t { font-weight: 700; font-size: 14px; line-height: 1.25; color: var(--ink-side-faint); transition: color 180ms ease; }
+  /* the rail comes alive — each stop wears its room's color */
+  .tab[data-tab="spine"]   .num { background:#6E8CA0; }
+  .tab[data-tab="tl"]      .num { background:#A5885B; }
+  .tab[data-tab="map"]     .num { background:#9A8F5F; }
+  .tab[data-tab="stay"]    .num { background:#6C918B; }
+  .tab[data-tab="options"] .num { background:#967486; }
+  .tab[data-tab="finds"]   .num { background:#6E8A64; }
+  .tab[data-tab="fine"]    .num { background:#A77062; }
+  .tab:not(.on) .num { box-shadow: 0 0 0 0 rgba(242,237,227,0); transition: width 200ms ease, height 200ms ease, background-color 280ms ease, font-size 200ms ease, color 200ms ease, transform 180ms ease, box-shadow 180ms ease; }
+  .tab:not(.on):hover .num { transform: scale(1.5); box-shadow: 0 0 0 3px rgba(242,237,227,0.12); }
+  .tab:not(.on):hover .t { color: var(--ink-side); }
   .tab.on {
     background-image: radial-gradient(rgba(0,0,0,0.035) 1px, transparent 1.2px);
     background-size: 6px 6px;
@@ -231,6 +242,55 @@
   ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
 
+  /* the cover — one click in, just for fun */
+  .cover {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--cream);
+    display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 24px;
+    opacity: 1; transition: opacity 550ms ease;
+    cursor: pointer;
+  }
+  .cover.gone { opacity: 0; pointer-events: none; }
+  .cover-inner { max-width: 560px; }
+  .cover-photo {
+    display: block; width: min(300px, 70vw); margin: 0 auto 26px;
+    border: 10px solid #F2EDE3; border-bottom-width: 34px; border-radius: 2px;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.55);
+    transform: rotate(-2.5deg);
+  }
+  .cover-ball {
+    width: 22px; height: 22px; border-radius: 50%; margin: 0 auto 18px;
+    background: #D6E34B; border: 2.5px solid #F2EDE3; position: relative;
+    animation: bounce 2.4s ease-in-out infinite;
+  }
+  .cover-ball::before, .cover-ball::after {
+    content: ''; position: absolute; top: 3px; bottom: 3px; width: 7px;
+    border: 1.8px solid #FFFFFF; border-radius: 50%;
+  }
+  .cover-ball::before { left: -2px; border-left: none; }
+  .cover-ball::after  { right: -2px; border-right: none; }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+  .cover-kicker { font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-side-faint); margin-bottom: 14px; }
+  .cover-title { font-family: 'Alegreya', Georgia, serif; font-weight: 800; font-size: clamp(40px, 8vw, 64px); line-height: 1.04; color: #F2EDE3; margin-bottom: 20px; }
+  .cover-dots { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+  .cover-dots span { width: 11px; height: 11px; border-radius: 50%; animation: dotpop 600ms ease backwards; }
+  .cover-dots span:nth-child(1) { background:#6E8CA0; animation-delay: 150ms; }
+  .cover-dots span:nth-child(2) { background:#A5885B; animation-delay: 250ms; }
+  .cover-dots span:nth-child(3) { background:#9A8F5F; animation-delay: 350ms; }
+  .cover-dots span:nth-child(4) { background:#6C918B; animation-delay: 450ms; }
+  .cover-dots span:nth-child(5) { background:#967486; animation-delay: 550ms; }
+  .cover-dots span:nth-child(6) { background:#6E8A64; animation-delay: 650ms; }
+  .cover-dots span:nth-child(7) { background:#A77062; animation-delay: 750ms; }
+  @keyframes dotpop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .cover-sub { font-size: 16px; line-height: 1.6; color: var(--ink-side-faint); max-width: 42ch; margin: 0 auto 30px; }
+  .cover-btn {
+    font-family: 'Alegreya', Georgia, serif; font-weight: 800; font-size: 16px;
+    color: #0d1013; background: #D6E34B; border: 2px solid #F2EDE3; border-radius: 999px;
+    padding: 12px 34px; cursor: pointer; transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+  .cover-btn:hover { transform: scale(1.06); box-shadow: 0 8px 26px rgba(214,227,75,0.25); }
+
   /* phone layout — the board in your hand, mid-trip */
   @media (max-width: 820px) {
     html, body { overflow: auto; height: auto; }
@@ -262,6 +322,19 @@
 </style>
 </head>
 <body data-tab="spine">
+
+<div class="cover" id="cover" onclick="enterBoard()">
+  <div class="cover-inner">
+    <img class="cover-photo" src="cover.jpg" alt="" onerror="this.style.display='none'">
+    <div class="cover-ball"></div>
+    <div class="cover-kicker">September 2026 · Spain</div>
+    <h1 class="cover-title">Dan &amp; Hans<br>go to Spain</h1>
+    <div class="cover-dots"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <p class="cover-sub">A week of tennis at the Carlos Alcaraz academy, and the trip of a lifetime wrapped around it. The whole plan is one click away.</p>
+    <button class="cover-btn">Step inside</button>
+  </div>
+</div>
+
 <div class="app">
 
   <nav class="side">
@@ -791,6 +864,15 @@
 </div>
 
 <script>
+  function enterBoard() {
+    const c = document.getElementById('cover');
+    if (!c) return;
+    c.classList.add('gone');
+    setTimeout(() => c.remove(), 600);
+  }
+  // deep links (a texted #stay etc.) skip the cover and land on the tab
+  if (location.hash) { const c = document.getElementById('cover'); if (c) c.remove(); }
+
   const TITLES = { spine: 'The Plan', tl: 'Day by Day — the whole trip, every option', map: 'The Map', stay: 'Places to Stay — every bed, pitched', options: 'Things To Do', finds: 'Lucky Timing', fine: 'The Fine Print — deadlines · money · questions' };
   const ORDER = ['spine','tl','map','stay','options','finds','fine'];
   const tabs = document.querySelectorAll('.tab');
