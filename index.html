@@ -253,12 +253,15 @@
   }
   .cover.gone { opacity: 0; pointer-events: none; }
   .cover-inner { max-width: 560px; }
-  .cover-photo {
-    display: block; width: min(300px, 70vw); margin: 0 auto 26px;
-    border: 10px solid #F2EDE3; border-bottom-width: 34px; border-radius: 2px;
-    box-shadow: 0 14px 40px rgba(0,0,0,0.55);
-    transform: rotate(-2.5deg);
+  .cover-print {
+    display: inline-block; background: #F2EDE3; padding: 9px 9px 6px; border-radius: 2px;
+    box-shadow: 0 16px 44px rgba(0,0,0,0.6);
+    transform: rotate(-2.5deg); margin: 0 auto 24px;
+    transition: transform 250ms ease;
   }
+  .cover-print:hover { transform: rotate(-0.5deg) scale(1.02); }
+  .cover-print img { display: block; max-height: 34vh; max-width: min(70vw, 380px); width: auto; border-radius: 1px; }
+  .cover-print .print-cap { font-family: 'Alegreya', Georgia, serif; font-size: 12px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #34383C; padding: 8px 4px 4px; }
   .cover-ball {
     width: 22px; height: 22px; border-radius: 50%; margin: 0 auto 18px;
     background: #D6E34B; border: 2.5px solid #F2EDE3; position: relative;
@@ -325,7 +328,10 @@
 
 <div class="cover" id="cover" onclick="enterBoard()">
   <div class="cover-inner">
-    <img class="cover-photo" src="cover.jpg" alt="" onerror="this.style.display='none'">
+    <div class="cover-print" id="coverPrint">
+      <img src="cover.jpg" alt="Dan and Hans, back in the day" onerror="document.getElementById('coverPrint').style.display='none'">
+      <div class="print-cap">The original doubles team</div>
+    </div>
     <div class="cover-ball"></div>
     <div class="cover-kicker">September 2026 · Spain</div>
     <h1 class="cover-title">Dan &amp; Hans<br>go to Spain</h1>
