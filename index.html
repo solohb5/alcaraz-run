@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Alcaraz Run — Trip Board</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,700;0,800;1,400;1,500;1,700&display=swap" rel="stylesheet">
+<style>
+  /* Bones: Sir Hans BOARD.html (the Pentagram ledger system). Nine rooms, one journey.
+     Copy rule (Hans, 8/10): plain short sentences a human can read. No fragment grammar. */
+  :root {
+    --cream: #17150F;
+    --ink-side: #F2EDE3;
+    --ink-side-faint: #5c5648;
+    --frame: #4A443A;
+    --ink: #161a1c;
+    --ink-soft: #34383C;
+    --ink-faint: #4A4F54;
+    --urgency: #932D14;
+  }
+  body[data-tab="spine"]   { --panel:#CADAE1; --stamp:#6E8CA0; --line:#A9BFC7; }
+  body[data-tab="tl"]      { --panel:#D9CBB9; --stamp:#A5885B; --line:#C6B29A; }
+  body[data-tab="map"]     { --panel:#D8D2BE; --stamp:#9A8F5F; --line:#C4BC9E; }
+  body[data-tab="stay"]    { --panel:#C2D7D3; --stamp:#6C918B; --line:#A6C1BC; }
+  body[data-tab="finds"]   { --panel:#C9D6C4; --stamp:#6E8A64; --line:#AABEA1; }
+  body[data-tab="options"] { --panel:#D8C4CE; --stamp:#967486; --line:#BFA3B2; }
+  body[data-tab="fine"]    { --panel:#DDC0B4; --stamp:#A77062; --line:#C7A99C; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Alegreya', Georgia, serif;
+    color: var(--ink-side);
+    background: var(--cream);
+    -webkit-font-smoothing: antialiased;
+  }
+  .app { display: flex; height: 100vh; }
+
+  .side {
+    width: 248px; flex-shrink: 0;
+    padding: 28px 20px 20px 28px;
+    display: flex; flex-direction: column;
+    border-right: 2px solid var(--frame);
+    background: var(--cream);
+    position: relative; z-index: 2;
+  }
+  .brandcard { border: 2px solid var(--frame); border-radius: 8px; padding: 16px 16px 12px; margin: 0 4px 20px 0; }
+  .brand { font-weight: 800; font-size: 19px; letter-spacing: 0.01em; }
+  .sub { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-side-faint); margin-top: 4px; font-style: italic; }
+  .anchorline {
+    display: flex; align-items: center; gap: 9px;
+    font-size: 10.5px; letter-spacing: 0.05em; text-transform: uppercase; font-style: italic;
+    color: var(--ink-side-faint);
+    margin: 0 4px 18px 0; padding-bottom: 12px; border-bottom: 1px solid var(--frame);
+  }
+  .anchorline::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--frame); flex-shrink: 0; }
+
+  .tabgroup { display: flex; flex-direction: column; gap: 6px; position: relative; }
+  .tabgroup::before {
+    content: ''; position: absolute; left: 22px; top: 22px; bottom: 22px; width: 1px;
+    background: var(--frame); z-index: 0;
+  }
+  .tab {
+    position: relative; width: 100%; min-height: 44px; z-index: 1;
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 12px 8px 16px;
+    border: 2px solid transparent; border-radius: 8px;
+    background: none; cursor: pointer; text-align: left;
+    font-family: 'Alegreya', Georgia, serif; color: var(--ink-side);
+  }
+  .tab .num {
+    position: relative; z-index: 1; flex-shrink: 0;
+    width: 8px; height: 8px; margin-left: 0; border-radius: 50%;
+    background: var(--frame);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0; color: transparent;
+    transition: width 200ms ease, height 200ms ease, background-color 280ms ease, font-size 200ms ease, color 200ms ease;
+  }
+  .tab .t { font-weight: 700; font-size: 14px; line-height: 1.25; color: var(--ink-side-faint); }
+  .tab.on {
+    background-image: radial-gradient(rgba(0,0,0,0.035) 1px, transparent 1.2px);
+    background-size: 6px 6px;
+    background-position: 0 0;
+    background-attachment: fixed;
+    background-color: var(--panel);
+    border: 2px solid var(--ink);
+    border-right: 2px solid var(--panel);
+    border-radius: 8px 0 0 8px;
+    width: calc(100% + 22px);
+    position: relative; z-index: 3;
+    transition: background-color 280ms ease, border-color 280ms ease;
+  }
+  .tab.on .num {
+    width: 22px; height: 22px; margin-left: -7px;
+    background: var(--stamp); color: #0d1013;
+    font-size: 10px; font-weight: 800;
+  }
+  .tab.on .t { color: var(--ink); font-weight: 800; }
+  .tab:not(.on):hover { background: rgba(255,255,255,0.03); }
+
+  .side .fill { flex: 1; }
+  .side .foot { padding: 14px 16px 0 0; font-size: 11px; color: var(--ink-side-faint); line-height: 1.6; font-style: italic; border-top: 1px solid var(--frame); margin-top: 14px; }
+
+  .main {
+    flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0;
+    background-image: radial-gradient(rgba(0,0,0,0.035) 1px, transparent 1.2px);
+    background-size: 6px 6px;
+    background-position: 0 0;
+    background-attachment: fixed;
+    background-color: var(--panel);
+    color: var(--ink);
+    position: relative; z-index: 1;
+    transition: background-color 280ms ease;
+  }
+  .bar {
+    height: 60px; flex-shrink: 0; display: flex; align-items: center; gap: 12px; justify-content: space-between;
+    padding: 0 40px; border-bottom: 2px solid var(--ink);
+  }
+  .bar .titlewrap { display: flex; align-items: center; gap: 12px; }
+  .bar .stamp {
+    width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+    background: var(--stamp); color: #0d1013;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800;
+  }
+  body[data-tab="spine"]   .bar .stamp::before { content: '01'; }
+  body[data-tab="tl"]      .bar .stamp::before { content: '02'; }
+  body[data-tab="map"]     .bar .stamp::before { content: '03'; }
+  body[data-tab="stay"]    .bar .stamp::before { content: '04'; }
+  body[data-tab="options"] .bar .stamp::before { content: '05'; }
+  body[data-tab="finds"]   .bar .stamp::before { content: '06'; }
+  body[data-tab="fine"]    .bar .stamp::before { content: '07'; }
+  .bar .title { font-weight: 800; font-size: 21px; letter-spacing: 0.005em; }
+  .bar .count { font-size: 12px; color: var(--ink-faint); font-style: italic; }
+
+  .panel { flex: 1; overflow-y: auto; padding: 28px 44px 20px; }
+  .panel-inner { max-width: 760px; }
+  .panel-inner.wide { max-width: 920px; }
+
+  .whatis { border: 2px solid var(--ink); border-radius: 6px; padding: 16px 16px; margin: 0 0 28px; background: rgba(255,255,255,0.28); }
+  .whatis .w-l { font-size: 10.5px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); display: block; margin-bottom: 8px; }
+  .whatis p { font-size: 15px; line-height: 1.6; color: var(--ink); }
+
+  .sec-label {
+    font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-soft); margin: 32px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--ink);
+  }
+  .sec-label:first-of-type { margin-top: 0; }
+  .sec-note { font-size: 13px; color: var(--ink-soft); margin: -4px 0 12px; line-height: 1.6; }
+
+  .rows { border: 1px solid var(--line); border-radius: 6px; background: rgba(255,255,255,0.24); overflow: hidden; }
+  .item { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .item:last-child { border-bottom: none; }
+  .item-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+  .item-title { font-weight: 700; font-size: 15px; line-height: 1.35; }
+  .item-time { flex-shrink: 0; font-size: 12px; color: var(--ink-faint); border: 1px solid var(--line); border-radius: 5px; padding: 2px 9px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .item-detail { font-size: 14.5px; color: var(--ink); line-height: 1.68; margin-top: 6px; }
+
+  .chip { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 4px; padding: 1px 7px; vertical-align: 1px; margin-left: 8px; }
+  .chip.v { background: var(--ink); color: #F2EDE3; }
+  .chip.w { border: 1px solid var(--ink-faint); color: var(--ink-soft); }
+  .chip.u { background: var(--urgency); color: #F2EDE3; }
+  .chip.plan { background: var(--stamp); color: #0d1013; }
+  .chip.rec  { border: 1.5px solid var(--urgency); color: var(--urgency); }
+
+  .tlrow { display: grid; grid-template-columns: 96px 92px 1fr; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); align-items: baseline; }
+  .tlrow:last-child { border-bottom: none; }
+  .tl-date { font-size: 12px; font-weight: 800; color: var(--ink-soft); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .who { justify-self: start; font-size: 9.5px; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; border-radius: 4px; padding: 2px 8px; white-space: nowrap; }
+  .who.dan  { border: 1px solid var(--ink-faint); color: var(--ink-soft); }
+  .who.you  { background: var(--ink); color: #F2EDE3; }
+  .who.both { background: var(--stamp); color: #0d1013; }
+  .who.ab   { background: var(--urgency); color: #F2EDE3; }
+  .tl-what { font-size: 14.5px; color: var(--ink); line-height: 1.68; }
+  .tl-what b { color: var(--ink); font-weight: 700; }
+
+  /* the plan's journey line — stations on a rail, easy on the brain */
+  .journey { margin: 4px 0 8px; }
+  .jstop { display: grid; grid-template-columns: 86px 30px 1fr; gap: 0 14px; }
+  .jdate { text-align: right; font-size: 11.5px; font-weight: 800; color: var(--ink-soft); padding-top: 5px; letter-spacing: 0.03em; line-height: 1.4; }
+  .jrail { position: relative; }
+  .jrail::before { content: ''; position: absolute; left: 50%; transform: translateX(-50%); top: 0; bottom: 0; width: 2.5px; background: var(--stamp); opacity: 0.6; }
+  .jstop:first-child .jrail::before { top: 10px; }
+  .jstop:last-child .jrail::before { height: 10px; bottom: auto; }
+  .jdot { position: absolute; left: 50%; transform: translateX(-50%); top: 7px; width: 13px; height: 13px; border-radius: 50%; background: var(--panel); border: 3px solid var(--ink); z-index: 1; box-sizing: border-box; }
+  .jdot.ball { width: 18px; height: 18px; background: #D6E34B; top: 4px; }
+  .jdot.ab { background: var(--urgency); }
+  .jbody { padding-bottom: 26px; }
+  .jbody h3 { font-family: 'Alegreya', Georgia, serif; font-size: 16.5px; font-weight: 800; margin-bottom: 4px; }
+  .jbody h3 .chip { margin-left: 6px; }
+  .jbody p { font-size: 14.5px; color: var(--ink); line-height: 1.68; max-width: 64ch; }
+  .jbody .jopt { margin-top: 8px; font-size: 13px; color: var(--ink-soft); padding-left: 14px; max-width: 62ch; line-height: 1.65; }
+  .jbody .jopt b { color: var(--ink); font-weight: 700; }
+
+  .clockcard { border: 2px solid var(--urgency); border-radius: 6px; background: rgba(255,255,255,0.3); padding: 14px 18px; margin-bottom: 14px; }
+  .clockcard .item-time { border-color: var(--urgency); color: var(--urgency); font-weight: 700; }
+
+  /* learn-more expanders — click to open the story */
+  details.more { margin-top: 8px; }
+  details.more summary { cursor: pointer; font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--stamp); list-style: none; display: inline-flex; align-items: center; gap: 6px; user-select: none; }
+  details.more summary::-webkit-details-marker { display: none; }
+  details.more summary::before { content: '+'; font-size: 14px; line-height: 1; }
+  details.more[open] summary::before { content: '−'; }
+  details.more summary:hover { color: var(--ink); }
+  details.more .deep { margin-top: 8px; padding: 12px 16px; background: rgba(255,255,255,0.4); border-radius: 6px; font-size: 13.5px; line-height: 1.68; color: var(--ink); max-width: 66ch; }
+
+  .anchorcard { border: 2px solid var(--ink); border-radius: 6px; padding: 14px 18px; margin: 24px 0; background: rgba(255,255,255,0.34); }
+  .anchorcard .sec-label { margin: 0 0 8px; padding-bottom: 0; border-bottom: none; }
+  .anchorcard p { font-size: 13.5px; color: var(--ink); line-height: 1.62; }
+
+  .donestrip { margin-top: 36px; padding-top: 16px; border-top: 1px solid var(--ink); }
+  .donestrip .sec-label { margin-top: 0; }
+  .donerow { font-size: 13px; color: var(--ink-soft); line-height: 1.9; }
+  .donerow b { color: var(--ink-soft); font-weight: 700; }
+
+  .mapframe { border: 2px solid var(--ink); border-radius: 6px; background: rgba(255,255,255,0.22); padding: 8px; margin-bottom: 20px; }
+  .mapframe svg { display: block; width: 100%; height: auto; }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px 22px; padding: 10px 16px 12px; font-size: 12px; color: var(--ink-soft); border-top: 1px solid var(--line); margin-top: 6px; }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .lg-solid { width: 26px; height: 0; border-top: 3px solid var(--ink); }
+  .lg-dash  { width: 26px; height: 0; border-top: 3px dashed var(--urgency); }
+  .lg-cut   { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--ink-faint); opacity: .55; }
+  .lg-camp  { width: 13px; height: 13px; border-radius: 50%; background: #D6E34B; border: 2px solid var(--ink); }
+  .lg-zone  { width: 16px; height: 12px; border-radius: 50%; background: rgba(147,45,20,.14); border: 1.5px dashed rgba(147,45,20,.5); }
+
+  .cardfoot { flex-shrink: 0; padding: 12px 44px; border-top: 1px solid var(--ink); font-size: 11px; color: var(--ink-faint); font-style: italic; text-align: center; background: var(--panel); }
+
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+  /* phone layout — the board in your hand, mid-trip */
+  @media (max-width: 820px) {
+    html, body { overflow: auto; height: auto; }
+    .app { display: block; height: auto; }
+    .side { width: 100%; padding: 12px 14px 8px; border-right: none; border-bottom: 2px solid var(--frame); position: sticky; top: 0; z-index: 20; }
+    .brandcard { display: flex; align-items: baseline; gap: 10px; padding: 8px 12px; margin: 0 0 10px; }
+    .brand { font-size: 15px; }
+    .sub { margin-top: 0; font-size: 9px; }
+    .anchorline, .side .foot, .side .fill { display: none; }
+    .tabgroup { flex-direction: row; overflow-x: auto; gap: 6px; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+    .tabgroup::before { display: none; }
+    .tab { min-height: 34px; width: auto; flex: 0 0 auto; padding: 6px 12px; border: 1px solid var(--frame); border-radius: 999px; }
+    .tab .num { display: none; }
+    .tab .t { font-size: 12.5px; white-space: nowrap; }
+    .tab.on { width: auto; border: 2px solid var(--ink); border-right: 2px solid var(--ink); border-radius: 999px; background-attachment: scroll; }
+    .main { overflow: visible; background-attachment: scroll; }
+    .bar { height: auto; padding: 10px 16px; }
+    .bar .title { font-size: 17px; }
+    .bar .count { display: none; }
+    .panel { overflow: visible; padding: 16px 14px 48px; }
+    .panel-inner, .panel-inner.wide { max-width: 100%; }
+    .jstop { grid-template-columns: 60px 20px 1fr; gap: 0 8px; }
+    .jdate { font-size: 10px; }
+    .tlrow { grid-template-columns: 84px 1fr; }
+    .tlrow .who { display: none; }
+    .item-head { flex-wrap: wrap; gap: 6px 12px; }
+    .cardfoot { padding: 10px 16px; }
+  }
+</style>
+</head>
+<body data-tab="spine">
+<div class="app">
+
+  <nav class="side">
+    <div class="brandcard">
+      <div class="brand">The Alcaraz Run</div>
+      <div class="sub">Spain · Sept 2026 · Hans &amp; Dan</div>
+    </div>
+    <div class="anchorline">Camp: Sept 13–19 · dates confirmed</div>
+    <div class="tabgroup" id="tabGroup">
+      <button class="tab on" data-tab="spine"><span class="num">01</span><span class="t">The Plan</span></button>
+      <button class="tab" data-tab="tl"><span class="num">02</span><span class="t">Day by Day</span></button>
+      <button class="tab" data-tab="map"><span class="num">03</span><span class="t">The Map</span></button>
+      <button class="tab" data-tab="stay"><span class="num">04</span><span class="t">Places to Stay</span></button>
+      <button class="tab" data-tab="options"><span class="num">05</span><span class="t">Things To Do</span></button>
+      <button class="tab" data-tab="finds"><span class="num">06</span><span class="t">Lucky Timing</span></button>
+      <button class="tab" data-tab="fine"><span class="num">07</span><span class="t">The Fine Print</span></button>
+    </div>
+    <div class="fill"></div>
+    <div class="foot">Made for Hans, Dan &amp; Jamie.<br>Unforgettable, at cost.<br>Got an idea for the trip?<br>Tell Hans. — Álvaro</div>
+  </nav>
+
+  <div class="main">
+    <div class="bar"><div class="titlewrap"><span class="stamp"></span><span class="title" id="barTitle">The Plan</span></div><span class="count" id="barCount">tab 1 of 9</span></div>
+    <div class="panel"><div class="panel-inner" id="panelInner">
+
+      <!-- ═══════════ 01 THE PLAN ═══════════ -->
+      <section class="tabpanel" data-panel="spine">
+        <div class="whatis"><span class="w-l">What this tab is</span>
+          <p>The whole trip in one page, for everyone on it. The camp is Sept 13 to 19 and those dates are locked. Hans and Dan are both playing. Dan lands in Spain five days ahead; Hans flies standby and meets him in València. This board is shared — Hans, Dan, Jamie — so if you see something we should add or change, tell Hans.</p></div>
+
+        <div class="journey">
+          <div class="jstop">
+            <div class="jdate">SEPT 5–8</div>
+            <div class="jrail"><div class="jdot"></div></div>
+            <div class="jbody">
+              <h3>Dan opens in Barcelona <span class="chip v">his leg</span></h3>
+              <p>Dan lands September 5 and gets three days on his own. The plan: Sagrada Família and Park Güell done properly, evenings at the free Poblenou street festival, then the Euromed — Spain's prettiest train — down the coast, sea out the left window. One fact shapes his solo days: Dan works remotely Monday through Wednesday, starting around 6pm Spain time and running late. So his coast leg wants quiet days and a peaceful place to work from at night — and the board found him that place: Altafulla, a small beach village on the train line with a hillside hotel guests describe as silent. The full pitch is in Places to Stay, tab 4.</p>
+              <p class="jopt"><b>More options:</b> Montserrat, the monastery in the cliffs, one hour by train. Tarragona, where a Roman amphitheater sits right above the sea, is nine minutes from Altafulla. One warning from the research: Sitges and Peñíscola are both mid-festival on exactly his dates, so they fell off the sleep list. Full day-by-day in tab 2.</p>
+            </div>
+          </div>
+          <div class="jstop">
+            <div class="jdate">~SEPT 9</div>
+            <div class="jrail"><div class="jdot"></div></div>
+            <div class="jbody">
+              <h3>Hans flies overnight <span class="chip w">flexible</span></h3>
+              <p>Standby on the passes, through whichever door has open seats — Madrid, Barcelona, or Paris with a cheap hop. The exact day can slide with flight loads; that's fine, the plan bends. Backup is a $400–500 paid one-way, not the plan.</p>
+            </div>
+          </div>
+          <div class="jstop">
+            <div class="jdate">SEPT 10–12</div>
+            <div class="jrail"><div class="jdot"></div></div>
+            <div class="jbody">
+              <h3>Together in València</h3>
+              <p>The meet city, and the exhale before camp. Base in Ruzafa, the bar-and-café neighborhood. The curated best of it: the market feast at a Michelin chef's counter, a beach afternoon in 25-degree water, the City of Arts at golden hour for free, and one great wood-fired paella.</p>
+              <p class="jopt"><b>Party more:</b> the El Carmen old-town bar crawl. <b>Eat more:</b> the Albufera lagoon boat and eel stew where paella was born. <b>Chill more:</b> bikes through the Turia — a nine-kilometer garden in a dried riverbed.</p>
+              <p class="jopt"><b>Why meet HERE (open to challenge):</b> we checked the alternatives. Madrid means backtracking inland — into F1 race weekend hotel prices. Barcelona would repeat the days Dan just did. Alicante is closer to camp but smaller, with less to fill two days. València sits right on the route south with the best food and a real beach. If anyone feels strongly about a different meet city, say it now — nothing is booked.</p>
+            </div>
+          </div>
+          <div class="jstop">
+            <div class="jdate">SAT 12</div>
+            <div class="jrail"><div class="jdot"></div></div>
+            <div class="jbody">
+              <h3>South — straight into a festival <span class="chip v">confirmed</span></h3>
+              <p>Three hours down by train, and the arrival day happens to be the biggest night of Murcia's yearly fair. A huge costumed parade fills the city that evening. Step off the train and walk into it.</p>
+            </div>
+          </div>
+          <div class="jstop">
+            <div class="jdate">SEPT 13–19</div>
+            <div class="jrail"><div class="jdot ball"></div></div>
+            <div class="jbody">
+              <h3>THE CAMP — La Manga Club <span class="chip v">locked</span></h3>
+              <p>Seven days at the Carlos Alcaraz Academy, both of you playing. The camp plans group excursions; evenings are free, one outing max. The curated evening picks: Roca Rey's bullfight Tuesday, the Cabo de Palos lighthouse and a seafood dinner Wednesday, Cartagena's Roman festival Friday.</p>
+              <p class="jopt"><b>Rest-day menu:</b> the wild beaches at Calblanque · free mud baths on the Mar Menor · a snorkel boat over the reef · the little island of Tabarca.</p>
+            </div>
+          </div>
+          <div class="jstop">
+            <div class="jdate">SEPT 20–22</div>
+            <div class="jrail"><div class="jdot ab"></div></div>
+            <div class="jbody">
+              <h3>The ending — A or B <span class="chip u">choice open</span></h3>
+              <p>Ending A: Madrid, built around the Atlético–Real Madrid derby the night after camp. Ending B: Granada and the Alhambra first, then out through Madrid anyway. Day by Day (tab 02) has them side by side. B has a ticket deadline, so this gets decided soon.</p>
+            </div>
+          </div>
+          <div class="jstop">
+            <div class="jdate">~SEPT 22</div>
+            <div class="jrail"><div class="jdot"></div></div>
+            <div class="jbody">
+              <h3>Home <span class="chip w">flexible</span></h3>
+              <p>Out of Madrid, where Delta flies. Hans targets the 22nd with the 23rd kept empty as the standby retry day. Dan flies home on his own ticket. Hans is back at work Friday the 25th.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="donestrip">
+          <div class="sec-label">Already settled</div>
+          <div class="donerow">✅ <b>Camp dates</b> are confirmed from the academy's official site: Sept 13–19.</div>
+          <div class="donerow">✅ <b>Dan is playing.</b> He bought his own ticket. That question is closed.</div>
+          <div class="donerow">✅ <b>Rental car:</b> probably yes, at least for part of the week. It gets booked once dates lock.</div>
+          <div class="donerow">✅ <b>The research is done.</b> What's left is a few answers, not more homework.</div>
+        </div>
+      </section>
+
+      <!-- ═══════════ 02 DAY BY DAY ═══════════ -->
+      <section class="tabpanel" data-panel="tl" style="display:none">
+        <div class="whatis"><span class="w-l">What this tab is</span>
+          <p>Every day of the trip in order — built to be opened on a phone each morning. Tap "Today's options" under any day and it opens the menu of what's within reach that day: the plan, the food, the night, the backup. The tag on each row tells you whose day it is: <span class="who dan">Dan</span> alone, <span class="who you">Hans</span> alone, <span class="who both">Together</span>, and <span class="who ab">A or B</span> for the final days, whose full comparison sits below.</p></div>
+
+        <div class="sec-label">Dan's run-up · Sept 5–9</div>
+        <div class="sec-note">One thing shapes these days: Dan works US Mountain Time hours every Monday, Tuesday, and Wednesday — roughly 6pm until late, Spain time. So Monday the 7th through Wednesday the 9th, his evenings are work and his days are free. The evening options below those days are for the nights he's off, or for after his shift. Exact end time still to confirm with him.</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Saturday Sept 5 — Dan lands in Barcelona <span class="who dan">Dan</span></span><span class="item-time">arrival day</span></div><div class="item-detail">The plan: land, check in, and keep it easy. Best neighborhoods to sleep in: El Born (old town, walkable, the best tapas density) or Gràcia (village feel, more local). First evening: a slow vermouth-and-tapas wander around El Born, early night. Bonus already running: the Poblenou street festival — human towers, fire-runs, fireworks near the beach, free, through the 14th.<details class="more"><summary>Today's options</summary><div class="deep"><b>Around El Born:</b> tapas and vermouth, everything walkable.<br><b>Big night:</b> Razzmatazz's Saturday club night (~€15, five rooms) — or Paradiso, the world's #4 bar: free queue opens 3pm at the door.<br><b>Free:</b> the Poblenou festival near the beach.<br><b>Jet-lagged:</b> one vermouth, one plate, bed. Tomorrow is the big day.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Sunday Sept 6 — the Gaudí day <span class="who dan">Dan</span></span><span class="item-time">book tickets now</span></div><div class="item-detail">The plan: Sagrada Família in the morning and Park Güell in the late afternoon. Both need timed tickets bought online days ahead — this is the one thing Dan should book before he flies. Evening: seafood in Barceloneta by the water, or the festival again. If he wants a free stunner: Bunkers del Carmel at sunset, the hilltop view over the whole city.<details class="more"><summary>Learn more — Gaudí's unfinished life's work</summary><div class="deep">Antoni Gaudí took over the Sagrada Família in 1883 at age 31 and gave it the last 43 years of his life, the final decade living in the workshop like a monk. He knew it couldn't be finished in his lifetime, so he designed it for future generations to keep building. He was killed by a tram in 1926 and is buried in the crypt. The church has now been under construction for more than 140 years and is finally approaching completion. The inside is the real event: columns branching like a stone forest, and light pouring through the glass in waves of color that move through the day.</div></details><details class="more"><summary>Today's options</summary><div class="deep"><b>Booked:</b> Sagrada Família morning slot · Park Güell late afternoon.<br><b>Between:</b> Gothic Quarter wander, or a Barceloneta beach hour.<br><b>Sunset:</b> Bunkers del Carmel — the free hilltop view over the whole city.<br><b>Night:</b> seafood by the water in Barceloneta, or the festa again.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Monday Sept 7 — Dan's choice day <span class="who dan">Dan</span></span><span class="item-time">pick one</span></div><div class="item-detail">Three good versions of this day. One: Montserrat — the monastery built into cliffs an hour away by train, half a day. Two: a beach morning plus the Gothic Quarter and the Picasso Museum. Three: start the coast early and settle into Altafulla, the quiet beach village base — his work shift starts at six either way, and Altafulla's hillside hotel is the calmest desk on this coast. One cut to know about: Sitges was the old idea for tonight, but it is mid Bears Week, its biggest party of the year, so it is a day-trip now, not a bed.<details class="more"><summary>Today's options</summary><div class="deep"><b>Pick one:</b> Montserrat (1h train, half day, monastery in the cliffs) · beach morning + Picasso Museum · early coast start to Altafulla, the quiet base (see Places to Stay).<br><b>Cocktails:</b> Dr. Stravinsky (El Born, apothecary-style) or Two Schmucks.<br><b>Cheap and easy:</b> the festa's free concerts run all week.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Tuesday Sept 8 — down the coast <span class="who dan">Dan</span> <span class="chip w">suggestions</span></span><span class="item-time">the Euromed</span></div><div class="item-detail">The plan: the Euromed south, left side for the sea, €13–40 booked early. If he based in Altafulla, today writes itself: beach morning, the nine-minute train to Tarragona's Roman old town, back for the 6pm work shift. The research retired one old idea: Peñíscola, the walled castle town, runs its patron-saint festival with nightly street parties across his exact dates — still worth seeing from the train window, no longer worth a work-night bed. Or ride straight through to València and settle in. One wrinkle: if Barcelona draws a home Champions League game (Europe's big soccer tournament, games Sept 8–10, draw on Aug 27), a Camp Nou night might be worth rearranging for.<details class="more"><summary>Today's options</summary><div class="deep"><b>The ride:</b> the Euromed south — left side for the sea, €13–40 booked early.<br><b>Stopovers:</b> Tarragona (Roman amphitheater right above the beach, 9 min from Altafulla) · Peñíscola is cut for sleeping — its patron-saint festival runs his exact dates.<br><b>Check first:</b> did Barça draw a home game? If yes, tonight could be Camp Nou instead.<br><b>In València by dark:</b> an easy first Ruzafa round.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Wednesday Sept 9 — Dan in València, Hans in the air <span class="who dan">Dan</span> <span class="who you">Hans</span></span><span class="item-time">travel day</span></div><div class="item-detail">Dan checks into Ruzafa and does an easy night: croquetas at El Encuentro, a vermouth at Bar Tomate. Hans flies overnight from LA on the standby passes.<details class="more"><summary>Today's options</summary><div class="deep"><b>Dan:</b> settle in, walk Ruzafa, keep it light — the crew reunites tomorrow.<br><b>If restless:</b> Radio City in the old town runs till 4am every night.<br><b>Hans:</b> in the air. Window seat, water, sleep.</div></details></div></div>
+        </div>
+
+        <div class="sec-label">Together in València · Sept 10–12</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Thursday Sept 10 — the meet <span class="who both">Together</span></span><span class="item-time">first night</span></div><div class="item-detail">The plan: Hans lands and rides the metro into town — about 25 minutes to Xàtiva station, then a short walk into Ruzafa. Afternoon easy: beach hour or a nap. Evening: the Ruzafa crawl, one drink and one plate per stop, then move. The stops: El Encuentro (old-school, cheap beer, great croquetas), Bar Tomate (vermouth), Café Berlin or La Bella de Cádiz (cocktails), Olhöps if anyone wants craft beer.<details class="more"><summary>Today's options</summary><div class="deep"><b>Land:</b> metro from the airport, ~25 min to Xàtiva, short walk to Ruzafa.<br><b>Ease in:</b> beach hour or a nap — no heroics on arrival day.<br><b>The crawl:</b> El Encuentro → Bar Tomate → Café Berlin → Olhöps.<br><b>It's Thursday:</b> €30 dinner at Marina Beach Club's restaurant = free club entry after. Best value big night in the city.<br><b>Late:</b> Radio City till 4am.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Friday Sept 11 — the full València day <span class="who both">Together</span></span><span class="item-time">the big one</span></div><div class="item-detail">The plan, in order. At 9:30 sharp: esmorzaret at Central Bar inside the big market hall — the Valencian mid-morning feast of a giant sandwich, olives, beer, and rum-spiked espresso, about €10 (cheap backup: El Trocito del Medio nearby, €5). Wander the market and the Lonja, the medieval silk exchange next door. Horchata and fartons at Horchatería Santa Catalina. Afternoon: Malvarrosa beach, water around 25 degrees. At six: the free City of Arts walk while the white buildings turn gold. Dinner: an honest rice house (€20–25) or Ruzafa round two. Bigger night: the El Carmen crawl through the medieval quarter — best bar density in the city, just watch your pockets late.<details class="more"><summary>Today's options</summary><div class="deep"><b>9:30 sharp:</b> Central Bar esmorzaret, ~€10 (backup: El Trocito del Medio, €5).<br><b>Morning:</b> Central Market + the Lonja silk exchange next door · horchata at Santa Catalina.<br><b>Afternoon:</b> Malvarrosa beach — 25° water.<br><b>6pm:</b> the free City of Arts golden-hour loop.<br><b>Dinner:</b> honest arrocería, €20–25.<br><b>Friday night:</b> El Carmen crawl → Radio City, or L'Umbracle under the arches (~€12–20, no sportswear).</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Saturday Sept 12 — the splurge, then south <span class="who both">Together</span></span><span class="item-time">moving day</span></div><div class="item-detail">Two versions of the morning. Version one: Casa Carmela at 1pm — the 1922 beachfront paella house, wood fires, paella ordered by phone the day before (+34 963 710 073), about €50 each. Version two, cheaper and wilder: the Albufera lagoon — a €5 flat-bottom boat from El Palmar village and eel-and-potato stew at Restaurante Mateu or El Pescador, €20–30 all in. Then the afternoon train south. Evening: the Gran Desfile parade in Murcia city — the fair's biggest night — then out to La Manga Club. If the rental car starts today, grab it at the station.<details class="more"><summary>Learn more — what the parade is</summary><div class="deep">"Moors and Christians" parades re-enact the medieval centuries when Spain was split between Muslim and Christian kingdoms. Costumed "armies" march in slow formation — embroidered robes, armor, drums, brass bands — and the point is spectacle, not sides: the Moorish companies are usually the most lavish and the most coveted to join. Murcia's version caps the city's September fair, whose heart is carrying the Virgin of Fuensanta down from her mountain sanctuary into the cathedral. It's the whole city in the street on its proudest night, and you arrive right into the middle of it.</div></details><details class="more"><summary>Today's options</summary><div class="deep"><b>The splurge:</b> Casa Carmela at 1pm, pre-ordered — or the Albufera boat (€5) and lunch in El Palmar village instead.<br><b>The move:</b> afternoon train south; grab the rental car at the station if it starts today.<br><b>Tonight:</b> the Gran Desfile parade in Murcia — the year's biggest night.<br><b>After:</b> the fairground verbena (open-air dance party) — this is the feria's final weekend, so tonight is the party.</div></details></div></div>
+        </div>
+
+        <div class="sec-label">Camp week · Sept 13–19 · training first, one outing per evening</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Sunday Sept 13 — camp day one <span class="who both">Together</span></span><span class="item-time">easy night</span></div><div class="item-detail">The plan: first training day, keep the evening inside the resort. Dinner at Bellaluz square — Angelo's for pizza, Luigi's for Italian — or tapas down at the Cala del Barco beach cove. There is a bullfight in Murcia tonight, but day one plus a 45-minute drive is a bad trade. Skip it.<details class="more"><summary>Today's options</summary><div class="deep"><b>Camp day 1</b> — settle in, learn the courts.<br><b>Resort dinner:</b> Angelo's pizza or Luigi's Italian at Bellaluz square · tapas at the Cala del Barco beach cove.<br><b>If restless:</b> the feria's final verbena night runs in Murcia — but training starts tomorrow, and the week is long.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Monday Sept 14 — the legends option <span class="who both">Together</span></span><span class="item-time">optional</span></div><div class="item-detail">Tonight's option is real: Morante and Manzanares, two living legends of bullfighting, at 6:30 in Murcia. My honest advice: save yourselves for tomorrow. Two bull nights in a row on training legs is a lot. Resort night instead: The Last Drop sports bar or a quiet one.<details class="more"><summary>Today's options</summary><div class="deep"><b>The option:</b> Morante &amp; Manzanares corrida, 18:30 in Murcia — two living legends, if you must.<br><b>The advice:</b> save it. Roca Rey is tomorrow.<br><b>Easy night:</b> The Last Drop sports bar at the resort.<br><b>Middle path:</b> the tapas lanes at Plaza de las Flores in Murcia, one round, home early.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Tuesday Sept 15 — THE night out <span class="who both">Together</span></span><span class="item-time">Roca Rey · 18:30</span></div><div class="item-detail">The plan: Roca Rey — bullfighting's biggest current star — closes the fair at La Condomina in Murcia. Sun seats run about €25–40, shade seats more, plus a €12 fee if bought online at Servitoro; the box office at the ring opens September 1. Drive, or pre-book the ride home — the last bus back leaves before the final bull. If bullfighting isn't your thing: Cartagena's 2,000-year-old Roman theater is free from 6 to 8 tonight, every Tuesday.<details class="more"><summary>Today's options</summary><div class="deep"><b>THE night:</b> Roca Rey, 18:30, La Condomina in Murcia. Sun seats ~€25–40, shade more. Drive or pre-book the taxi home — the last bus leaves before the final bull.<br><b>Round after:</b> Plaza de las Flores tapas lanes.<br><b>No bulls?</b> Teatro Romano free 6–8pm + a Cartagena port dinner.<br><b>Either way:</b> reasonable bedtime — training tomorrow.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Wednesday Sept 16 — lighthouse and seafood <span class="who both">Together</span></span><span class="item-time">Cabo de Palos</span></div><div class="item-detail">The plan: the fishing port of Cabo de Palos, 30 minutes away. Walk to the lighthouse for sunset, then caldero — the local fisherman's rice — at La Tana or Bocana de Palos on the little harbor. Zero-effort alternative: La Manga's own beach-town festival opens tonight at Plaza Bohemia, free, on the doorstep.<details class="more"><summary>Today's options</summary><div class="deep"><b>The plan:</b> Cabo de Palos — lighthouse walk at sunset, then caldero (fisherman's rice) at La Tana or Bocana de Palos on the little harbor. 30 minutes.<br><b>Doorstep:</b> La Manga's festival opens tonight at Plaza Bohemia, free.<br><b>The strip:</b> Zoco zone bars if the season's still breathing.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Thursday Sept 17 — recovery, or the rest-day menu <span class="who both">Together</span></span><span class="item-time">quiet night</span></div><div class="item-detail">The plan: a real recovery night at the resort. And whenever the camp hands out a free day this week, here's the menu: the wild beaches at Calblanque, 20 minutes away (Playa Larga is the pick) · the free Mar Menor mud baths at Lo Pagán (sun-dry, rinse in the lagoon, not the sea) · a snorkel boat over the Islas Hormigas reef from Cabo de Palos · or the little island of Tabarca, a boat ride up the coast.<details class="more"><summary>Today's options</summary><div class="deep"><b>Tonight:</b> real recovery — resort dinner, legs up.<br><b>The rest-day menu, whenever camp gives one:</b><br>· Calblanque wild beaches, 20 min (Playa Larga)<br>· Free mud baths at Lo Pagán — dry like a statue, rinse in the lagoon<br>· Snorkel boat over the protected reef (no license needed)<br>· Tabarca island — boat from Santa Pola, caldero lunch</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Friday Sept 18 — Romans in the streets <span class="who both">Together</span></span><span class="item-time">Cartagena</span></div><div class="item-detail">The plan: opening night of Carthagineses y Romanos — Cartagena's whole old town dressed as two ancient armies, torchlit parades, feast camps, free to walk through. Pair it with the port promenade and dinner in town. Thirty minutes from the resort.<details class="more"><summary>Today's options</summary><div class="deep"><b>Tonight:</b> Carthagineses y Romanos opening — torchlit parades through the old town, free.<br><b>Then:</b> the festival camp — fifty legion-run bars, open to visitors, going till very late. They stage mock Carthaginian weddings for tourists.<br><b>Pace note:</b> tomorrow is the LAST training day. Go, marvel, come home standing.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Saturday Sept 19 — last camp day <span class="who both">Together</span></span><span class="item-time">farewell night</span></div><div class="item-detail">The plan: finish camp, pack for the early move, and pick a farewell night: the Cartagena festival again, cheap loud soccer at Real Murcia (€15–25), or seconds at Cabo de Palos. Tonight's other option for the brave: the fair's Corrida de la Prensa bullfight in Murcia.<details class="more"><summary>Today's options</summary><div class="deep"><b>Last camp day</b> — finish strong, get the certificate, pack for the early move.<br><b>Farewell night, pick one:</b><br>· The Cartagena festival camp, round two<br>· Real Murcia soccer, €15–25, big loud crowd<br>· Seconds at Cabo de Palos<br>· The Corrida de la Prensa in Murcia<br><b>Tomorrow:</b> ending A or B begins — bags ready tonight.</div></details></div></div>
+        </div>
+
+        <div class="sec-label">The final days · Sept 20–22 · pick ending A or B</div>
+        <div class="sec-note">Camp ends Saturday the 19th and the flight home is around the 22nd. There are two ready-made endings for the days between. Hans and Dan pick one together, and the other dies. Ending B has a ticket deadline in late August, so this is the board's one live decision.</div>
+
+
+        <div class="sec-label">Ending A — Madrid, built around a derby · my pick</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Sunday: train up, derby at night</span><span class="item-time">Sun 20</span></div><div class="item-detail">Atlético Madrid against Real Madrid — the two giants of the city in one stadium. It happens to fall the day after camp ends, and it is the last soccer in Spain before the league takes a two-week break. Tickets are the catch: face value is €40 to €150, but they sell to club members first, so realistically you pay resale prices of about €100 to €250 each.<details class="more"><summary>Learn more — why this rivalry burns</summary><div class="deep">The derby is a class story. Real Madrid is the royal club — the establishment, the galácticos, the most decorated team in Europe. Atlético is the working-class club from the south of the city: harder, louder, forever the underdog that refuses to die, shaped for over a decade by coach Diego Simeone, who turned defiance into a playing style. The Metropolitano holds 70,000, and on derby night it is one of the loudest rooms in European sport. Even people who don't follow soccer circle this fixture.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Monday: Madrid, slowly</span><span class="item-time">Mon 21</span></div><div class="item-detail">Madrid's two great museums are free in the evening. The Prado (Spain's version of the Louvre) is free from 6 to 8. The Reina Sofía, home of Picasso's Guernica, is free from 7 to 9. At night there is Sésamo, a little cave bar from the 1950s in the old writers' quarter. Bring cash. The whole day costs almost nothing.<details class="more"><summary>Learn more — the cave bar</summary><div class="deep">Sésamo opened in 1950 as a cellar bar for writers, painters, and students, and it never changed. The walls are covered in hand-painted quotes from the poets who drank there, the house sangria comes by the pitcher, and a pianist plays from about nine most nights. Legend ties Hemingway to the room — the quote painted over the bar is his. It's small, cheap, and feels like a secret even though it sits two streets from Plaza Santa Ana, at Calle Príncipe 7.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Tuesday: fly home</span><span class="item-time">Tue 22</span></div><div class="item-detail">Target flight home. If you end up staying to Wednesday, one of Spain's most loved pop bands, La Oreja de Van Gogh, plays their reunion show in the arena that Tuesday night. Tickets run about €40 to €80.</div></div>
+        </div>
+        <p class="sec-note" style="margin-top:10px">Why I lean A: it removes risk instead of adding it. No ticket deadline, no extra bus, and you end up exactly where the plane leaves. A derby night after a week of tennis camp is a story you tell for years.</p>
+
+        <div class="sec-label">Ending B — Granada and the Alhambra</div>
+        <div class="clockcard">
+          <div class="item-head"><span class="item-title">The catch: this ending is on a timer</span><span class="item-time">now → late Aug</span></div>
+          <div class="item-detail">The Alhambra's famous palace section sells timed tickets that run out four to eight weeks ahead. For your dates, the buying window is right now through late August. Pick this ending fast or it takes itself off the table. Two more honest notes: Granada has no festivals during your days there, and the special nighttime palace visits only run Friday and Saturday, which are the wrong days for you.</div>
+        </div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Sunday: bus over, evening up in the old quarter</span><span class="item-time">Sun 20</span></div><div class="item-detail">The direct bus from Murcia takes about three hours. The Albaicín is Granada's old Moorish hill neighborhood — whitewashed lanes and one famous lookout with the sunset view of the Alhambra against the mountains.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Monday: the Alhambra, then flamenco in a cave</span><span class="item-time">Mon 21</span></div><div class="item-detail">The Alhambra is a thousand-year-old Moorish palace and fortress, and probably the single greatest sight in Spain. Entry to the palace section is about €20 with a pre-booked time slot. That night you see flamenco in the Sacromonte caves, where Roma families have run cave-house shows for generations. The real ones cost €25 to €60. This is the deeper-Spain ending — if Dan is a history-and-culture guy, it wins.<details class="more"><summary>Learn more — the last kingdom and the caves</summary><div class="deep">The Alhambra was the palace of the Nasrids, the last Muslim dynasty in Spain, who held Granada for 250 years after the rest of the country had fallen. It's a fortress outside and a paradise inside — carved plaster like lace, courtyards built around running water, ceilings designed to look like heaven. In 1492 the last sultan, Boabdil, handed over the keys and, the story goes, wept on the mountain pass as he left. The timed tickets exist because millions visit and the rooms physically can't hold them. Zambra — the flamenco you'd see that night — is the Sacromonte cave community's own style, descended from Roma wedding dances, performed at arm's length in rooms carved into the hillside.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Tuesday: up to Madrid, fly out</span><span class="item-time">Tue 22</span></div><div class="item-detail">A four-hour train puts you in Madrid for the flight, either Tuesday night or at dawn Wednesday. It works, but it is the version with more moving parts.</div></div>
+        </div>
+
+        <div class="sec-label">The ending that got cut</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Ibiza — there was almost an ending C</span><span class="item-time">cut</span></div><div class="item-detail">The famous season-closing parties are the whole reason to go to Ibiza in September, and every big one falls between September 26 and October 11 — after you are home. You would get a quiet island and a flight each way for nothing. Cut with a clear conscience.</div></div>
+        </div>
+        <div class="sec-label">And home</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Wednesday Sept 23 <span class="who you">Hans</span></span><span class="item-time">retry day</span></div><div class="item-detail">Hans's standby retry day — kept empty on purpose. If flight loads look crazy closer in, one more buffer day gets added in front of work. Dan flies home on his own ticket, on his own schedule.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Friday Sept 25 <span class="who you">Hans</span></span><span class="item-time">re-entry</span></div><div class="item-detail">Back at work, with a week of Alcaraz forehands in the arm and a phone full of proof.</div></div>
+        </div>
+      </section>
+
+      <!-- ═══════════ 03 THE MAP ═══════════ -->
+      <section class="tabpanel" data-panel="map" style="display:none">
+        <div class="whatis"><span class="w-l">What this tab is</span>
+          <p>The route, drawn. The solid line is the committed path — one direction down the coast, then inland to the exit. The dashed red lines are the two possible endings for the final three days. You pick A or B. The faint hollow dots are places we looked at and cut on purpose. The tennis ball is the camp.</p></div>
+
+        <div class="mapframe">
+          <svg viewBox="0 0 1010 800" role="img" aria-label="Route map of Spain">
+            <text x="790" y="692" font-family="Alegreya" font-size="17" font-style="italic" fill="#161a1c" opacity="0.32">Mediterráneo</text>
+            <text x="40" y="300" font-family="Alegreya" font-size="15" font-style="italic" fill="#161a1c" opacity="0.28" transform="rotate(-72 60 300)">Atlántico</text>
+            <text x="735" y="72" font-family="Alegreya" font-size="13" font-style="italic" fill="#161a1c" opacity="0.35">FRANCIA</text>
+
+            <path d="M16,78 L117,10 L195,19 L289,15 L391,37 L508,34 L602,39 L633,49 L703,97 L797,93 L891,132 L996,133
+                     L972,190 L914,232 L824,266 L812,302 L742,380 L717,421 L759,494 L703,532 L691,568 L686,602
+                     L637,608 L594,624 L574,689 L469,690 L397,692 L324,747 L303,757 L270,740 L246,682 L199,641
+                     L164,645 L70,658 L43,661 L55,516 L23,497 L8,429 L47,351 L66,258 L51,185 L49,166 L51,151 L59,112 L20,83 Z"
+                  fill="rgba(255,255,255,0.38)" stroke="#161a1c" stroke-width="2.5" stroke-linejoin="round"/>
+
+            <polyline points="164,645 160,609 188,560 199,468 156,404 203,346 211,273 258,214 227,180 164,190 102,166"
+                  fill="none" stroke="#161a1c" stroke-width="1.2" stroke-dasharray="5 6" opacity="0.4"/>
+            <text x="78" y="430" font-family="Alegreya" font-size="13" font-style="italic" fill="#161a1c" opacity="0.35" transform="rotate(-78 98 430)">PORTUGAL</text>
+
+            <ellipse cx="969" cy="409" rx="26" ry="14" fill="rgba(255,255,255,0.38)" stroke="#161a1c" stroke-width="1.8" transform="rotate(18 969 409)"/>
+            <ellipse cx="854" cy="472" rx="13" ry="8" fill="rgba(255,255,255,0.38)" stroke="#4A4F54" stroke-width="1.5" opacity="0.6" transform="rotate(24 854 472)"/>
+
+            <ellipse cx="652" cy="592" rx="98" ry="60" fill="#932D14" opacity="0.09"/>
+            <ellipse cx="652" cy="592" rx="98" ry="60" fill="none" stroke="#932D14" stroke-width="1.5" stroke-dasharray="4 6" opacity="0.45"/>
+            <text x="562" y="545" font-family="Alegreya" font-size="10.5" font-style="italic" font-weight="700" fill="#932D14" opacity="0.8" letter-spacing="1">REGIÓN DE MURCIA · CAMP COUNTRY</text>
+
+            <path d="M990,86 C 962,130 936,186 917,224" fill="none" stroke="#161a1c" stroke-width="2" stroke-dasharray="2 7" stroke-linecap="round" opacity="0.75"/>
+            <text x="856" y="66" font-family="Alegreya" font-size="14" font-weight="700" fill="#161a1c">✈ Dan lands Sept 5</text>
+            <text x="856" y="84" font-family="Alegreya" font-size="11.5" font-style="italic" fill="#4A4F54">Barcelona · his Gaudí days</text>
+            <path d="M952,552 C 882,508 802,458 732,433" fill="none" stroke="#161a1c" stroke-width="2" stroke-dasharray="2 7" stroke-linecap="round" opacity="0.75"/>
+            <text x="787" y="550" font-family="Alegreya" font-size="14" font-weight="700" fill="#161a1c">✈ HANS lands ~Sept 10</text>
+            <text x="787" y="568" font-family="Alegreya" font-size="11.5" font-style="italic" fill="#4A4F54">via Madrid, BCN or Paris — whichever has seats</text>
+
+            <path d="M914,232 C 856,296 782,362 717,421" fill="none" stroke="#161a1c" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+            <text x="812" y="318" font-family="Alegreya" font-size="11.5" font-style="italic" font-weight="700" fill="#34383C" transform="rotate(42 812 318)">Dan · Euromed ~Sept 8/9</text>
+            <path d="M717,421 C 702,477 676,522 654,566" fill="none" stroke="#161a1c" stroke-width="4" stroke-linecap="round"/>
+            <path d="M654,566 C 666,578 676,590 684,598" fill="none" stroke="#161a1c" stroke-width="2.5" stroke-linecap="round"/>
+
+            <path d="M654,566 C 596,478 520,394 458,334" fill="none" stroke="#932D14" stroke-width="3.5" stroke-dasharray="9 7" stroke-linecap="round"/>
+            <path d="M654,566 C 592,606 522,636 468,644" fill="none" stroke="#932D14" stroke-width="3.5" stroke-dasharray="9 7" stroke-linecap="round"/>
+            <path d="M461,645 C 448,540 448,424 453,334" fill="none" stroke="#932D14" stroke-width="1.8" stroke-dasharray="2 6" stroke-linecap="round" opacity="0.7"/>
+            <text x="548" y="442" font-family="Alegreya" font-size="12.5" font-style="italic" font-weight="700" fill="#932D14" transform="rotate(-38 548 442)">ENDING A · derby Sun 20</text>
+            <text x="500" y="660" font-family="Alegreya" font-size="12.5" font-style="italic" font-weight="700" fill="#932D14">ENDING B</text>
+
+            <path d="M448,324 C 420,290 396,262 372,238" fill="none" stroke="#161a1c" stroke-width="2" stroke-dasharray="2 7" stroke-linecap="round" opacity="0.75"/>
+            <text x="268" y="228" font-family="Alegreya" font-size="14" font-weight="700" fill="#161a1c">✈ home ~Sept 22</text>
+            <text x="268" y="246" font-family="Alegreya" font-size="11.5" font-style="italic" fill="#4A4F54">Sept 23 = standby retry day</text>
+
+            <circle cx="914" cy="232" r="8" fill="#161a1c"/>
+            <text x="880" y="215" font-family="Alegreya" font-size="16" font-weight="800" fill="#161a1c">BARCELONA</text>
+            <text x="905" y="258" font-family="Alegreya" font-size="11.5" font-style="italic" fill="#34383C">Dan's leg · Sept 5–8</text>
+
+            <circle cx="717" cy="421" r="8" fill="#161a1c"/>
+            <text x="730" y="415" font-family="Alegreya" font-size="16" font-weight="800" fill="#161a1c">VALÈNCIA</text>
+            <text x="730" y="433" font-family="Alegreya" font-size="11.5" font-style="italic" fill="#34383C">Sept 10–12 · MEET DAN HERE</text>
+
+            <circle cx="654" cy="566" r="7" fill="#161a1c"/>
+            <text x="548" y="556" font-family="Alegreya" font-size="14" font-weight="800" fill="#161a1c">MURCIA</text>
+            <text x="500" y="573" font-family="Alegreya" font-size="11" font-style="italic" fill="#34383C">festival + bullfights</text>
+
+            <circle cx="686" cy="600" r="12" fill="#D6E34B" stroke="#161a1c" stroke-width="2.5"/>
+            <path d="M677,592 C 683,597 683,603 677,608" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M695,592 C 689,597 689,603 695,608" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+            <text x="704" y="595" font-family="Alegreya" font-size="15" font-weight="800" fill="#161a1c">THE CAMP 🎾</text>
+            <text x="704" y="612" font-family="Alegreya" font-size="11.5" font-style="italic" fill="#34383C">La Manga · Sept 13–19</text>
+
+            <circle cx="666" cy="624" r="4.5" fill="#161a1c" opacity="0.8"/>
+            <text x="600" y="648" font-family="Alegreya" font-size="12" font-weight="700" fill="#161a1c" opacity="0.85">Cartagena</text>
+            <text x="565" y="663" font-family="Alegreya" font-size="10.5" font-style="italic" fill="#34383C">Romans · Teatro</text>
+
+            <circle cx="453" cy="329" r="8" fill="#161a1c"/>
+            <text x="415" y="315" font-family="Alegreya" font-size="16" font-weight="800" fill="#161a1c">MADRID</text>
+            <text x="468" y="342" font-family="Alegreya" font-size="11.5" font-style="italic" fill="#34383C">last night or two · fly home here</text>
+
+            <circle cx="461" cy="645" r="7" fill="none" stroke="#932D14" stroke-width="3"/>
+            <text x="400" y="672" font-family="Alegreya" font-size="14" font-weight="800" fill="#161a1c">GRANADA</text>
+            <text x="388" y="688" font-family="Alegreya" font-size="10.5" font-style="italic" fill="#34383C">ending B · book Alhambra by late Aug</text>
+
+            <circle cx="274" cy="625" r="5" fill="none" stroke="#4A4F54" stroke-width="1.5" opacity="0.55"/>
+            <text x="240" y="612" font-family="Alegreya" font-size="11.5" font-style="italic" fill="#4A4F54" opacity="0.75">Sevilla · cut</text>
+            <circle cx="588" cy="47" r="5" fill="none" stroke="#4A4F54" stroke-width="1.5" opacity="0.55"/>
+            <text x="601" y="52" font-family="Alegreya" font-size="11.5" font-style="italic" fill="#4A4F54" opacity="0.75">San Sebastián · cut</text>
+            <circle cx="551" cy="130" r="5" fill="none" stroke="#4A4F54" stroke-width="1.5" opacity="0.55"/>
+            <text x="564" y="136" font-family="Alegreya" font-size="11.5" font-style="italic" fill="#4A4F54" opacity="0.75">Logroño wine fest · cut</text>
+            <text x="826" y="497" font-family="Alegreya" font-size="11.5" font-style="italic" fill="#4A4F54" opacity="0.75">Ibiza · cut</text>
+            <circle cx="597" cy="469" r="4" fill="none" stroke="#4A4F54" stroke-width="1.5" opacity="0.5"/>
+            <text x="608" y="464" font-family="Alegreya" font-size="10.5" font-style="italic" fill="#4A4F54" opacity="0.7">Albacete fair · only if driving</text>
+          </svg>
+          <div class="legend">
+            <span><span class="lg-solid"></span> the route</span>
+            <span><span class="lg-dash"></span> two endings — pick A or B</span>
+            <span><span class="lg-camp"></span> the camp 🎾</span>
+            <span><span class="lg-zone"></span> camp country</span>
+            <span><span class="lg-cut"></span> looked at, cut on purpose</span>
+          </div>
+        </div>
+
+        <div class="sec-label">How you actually move</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">LA to Spain</span><span class="item-time">standby · ~Sept 9</span></div><div class="item-detail">Hans flies on the standby passes through New York or Atlanta, into Madrid or Barcelona. There is also a sneaky third door: a nonstop to Paris and then a cheap $35–145 hop straight to València. He picks whichever flight has open seats. Fees run about $50 to $100.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Barcelona to València</span><span class="item-time">3h · €13–40</span></div><div class="item-detail">The Euromed coast train. This is Dan's leg, and Hans's too if his door is Barcelona. Left side for the sea.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">València to the camp region</span><span class="item-time">~3h · €20–40</span></div><div class="item-detail">Only about three direct trains a day, and seats open late. Book the flexible fare as soon as things lock. The camp is at La Manga Club, so Cartagena is the closer station — about 33 kilometers away. Murcia station also works and has more trains, about 45 minutes out.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Ending A: to Madrid</span><span class="item-time">~3h train · €25–60</span></div><div class="item-detail">A Sunday morning train puts you in Madrid in time for the derby that evening. You are already where the plane leaves.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Ending B: to Granada, then Madrid</span><span class="item-time">3h15 bus + 4h train</span></div><div class="item-detail">A direct bus runs to Granada fourteen times a day for €21 to €55. No useful train exists on that route. After Granada you take a four-hour train up to Madrid for the flight. This ending has one more moving part than A. That is the honest trade.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Madrid to LA</span><span class="item-time">standby · ~Sept 22</span></div><div class="item-detail">Buddy pass home. The next day is the retry day if the flight runs full.</div></div>
+        </div>
+      </section>
+
+      <!-- ═══════════ 04 PLACES TO STAY ═══════════ -->
+      <section class="tabpanel" data-panel="stay" style="display:none">
+        <div class="whatis"><span class="w-l">What this tab is</span>
+          <p>Where we would sleep, every night of the trip — researched and pitched, nothing booked yet. One honest note on the prices: booking sites only show their real numbers in a live browser, so every price here is a close estimate. Each pick gets a two-minute date check on Booking.com before any money moves.</p></div>
+
+        <div class="sec-label">Dan's coast stop · Sept 7–9 · the research changed the plan</div>
+        <div class="sec-note">Dan works Monday to Wednesday evenings, so his coast stop needs two things above all: quiet, and good wifi. We checked the calendars, and the two towns this board used to suggest both fail on his exact dates. Sitges is mid Bears Week, its biggest party of the year, September 4 to 13. Peñíscola runs its patron-saint festival September 7 to 17, with open-air concerts right where the good hotels sit. Both are out for the work nights. The new pick is Altafulla — a small beach village with its own train station, 45 minutes from Barcelona, next door to Tarragona's Roman old town.</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Hotel Oreneta, Altafulla <span class="chip rec">the pick</span></span><span class="item-time">~€65–75</span></div><div class="item-detail">A small family hotel on the hillside above the village, a short walk from the old town and the beach. Reviewers say exactly what Dan needs to hear: no cars, no noise, very quiet — and it scores 8.8 from over 1,400 guests. Garden terrace, wifi included, honest price. This is the work-week base.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Gran Claustre, Altafulla <span class="chip w">the splurge</span></span><span class="item-time">~€116–140</span></div><div class="item-detail">A boutique hotel built into a historic building next to Altafulla's little castle, with a rooftop hot tub and a restaurant people rave about. If Dan wants one memorable night out of his quiet stretch, this is it.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Why not Sitges or Peñíscola</span><span class="item-time">cut</span></div><div class="item-detail">Both are wonderful towns on the wrong dates. Sitges will be packed wall-to-wall with a ten-day festival crowd. Peñíscola's old town — the part worth staying in — hosts parades, fireworks, and street parties every night he would be there. For a beach day trip, either still works. For sleeping and working, they are out. If Dan skips the coast stop entirely, riding straight through to València early also works fine.</div></div>
+        </div>
+
+        <div class="sec-label">Together in València · Sept 10–12 · base: Ruzafa</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Blanq Ruzafa <span class="chip rec">the pick</span></span><span class="item-time">~€120–160</span></div><div class="item-detail">A six-room boutique guesthouse in the middle of Ruzafa, a few blocks from the train station. It is the only place we found where every room has a real writing desk — which matters, because Dan may still have work evenings here. Scores 8.8, feels like a find rather than a chain. The hotel publishes its own rates, so this one is on firmer ground than the rest: the twin room with two beds starts at €103 off-season, and September should land around €120 to 160.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">YOURS Boutique Stay <span class="chip w">backup</span></span><span class="item-time">~€115+</span></div><div class="item-detail">Twelve rooms behind a 19th-century facade, with something rare for this neighborhood: a pool. Twin room available. Less work-friendly than Blanq, more fun after a long travel day. The backup if Blanq is full.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Russafa Youth Hostel <span class="chip w">budget</span></span><span class="item-time">~€50–90</span></div><div class="item-detail">The honest budget play that keeps us in the neighborhood: a private double in a small, long-running hostel, bathroom shared with two other rooms. Fine if the work block moves to a café. The money saved is a night out.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">One warning while booking</span><span class="item-time">avoid</span></div><div class="item-detail">A place called OYO Guest House Ruzafa shows up constantly in cheap searches for this neighborhood. Its reviews are terrible across every platform. Whoever books, do not grab it off a search result.</div></div>
+        </div>
+
+        <div class="sec-label">Parade night · Saturday Sept 12 · the scarce bed</div>
+        <div class="clockcard">
+          <div class="item-head"><span class="item-title">This is the first bed to book, before any other</span><span class="item-time">book early</span></div>
+          <div class="item-detail">The night we arrive south is the biggest night of Murcia's year, and the city's hotels historically run about 94 percent full on it. Speed matters more than price-shopping here. One more fact that settles an old question: the camp package includes its six nights at the resort, so this Saturday is the only bed the camp side of the trip needs.</div>
+        </div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Hotel Cetina, Murcia <span class="chip rec">the pick</span></span><span class="item-time">~€60–90</span></div><div class="item-detail">A small boutique hotel one block from the Cathedral — which puts us in the middle of the parade route by walking out the front door. Drop the bags, see the Gran Desfile, sleep, and roll to camp in the morning, 45 minutes away.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Backups in the same walk</span><span class="item-time">~€78+</span></div><div class="item-detail">Catalonia Conde de Floridablanca, a solid four-star five minutes from the Cathedral, and RH Murcia Centro right on Plaza de las Flores, the tapas square. Either works if Cetina is gone.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">The skip-the-parade option, considered and rejected</span><span class="item-time">cut</span></div><div class="item-detail">Sleeping in Cartagena or going straight to La Manga that night would save some transfer time the next morning. It would also trade away what is likely the single best spectacle of the whole trip. Not worth it.</div></div>
+        </div>
+
+        <div class="sec-label">Camp week · Sept 13–19 · already covered</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">The camp package includes the resort <span class="chip v">on the official page</span></span><span class="item-time">6 nights</span></div><div class="item-detail">The academy's Experience page states it directly: six nights of five-star resort accommodation come with the camp. What it does not say is which hotel on the resort, or how the rooming works for two players traveling together — that question gets asked at payment time.</div></div>
+        </div>
+
+        <div class="sec-label">Ending A · Madrid, the writers' quarter · Sept 20–22</div>
+        <div class="sec-note">One thing to know going in: September is Madrid's most expensive month, full stop. These four sit in or beside Barrio de las Letras, the old writers' quarter — home turf of the Sésamo cave bar and the best late-night streets.</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Room Mate Alicia <span class="chip rec">the pick</span></span><span class="item-time">~€150–220</span></div><div class="item-detail">A design hotel whose big windows look straight down onto Plaza de Santa Ana, the square where the quarter's nights begin — and three minutes from Sésamo. Best value and best located of everything we found in the zone.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">NH Collection Palacio de Tepa</span><span class="item-time">~€200–280</span></div><div class="item-detail">A restored 19th-century palace designed by the same architect as the Prado museum, with a 16th-century canal visible under a glass floor in the lobby. The history pick.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">ME Madrid Reina Victoria <span class="chip w">the splurge</span></span><span class="item-time">~€250+</span></div><div class="item-detail">The hotel where bullfighters used to stay before their fights — the bulls' heads are still in the lounge — now topped by Radio, a 360-degree rooftop bar over the whole city. If ending A wins and one night gets the big treatment, this is the one.</div></div>
+        </div>
+
+        <div class="sec-label">Ending B · Granada · Sept 20–22</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Casa Morisca <span class="chip rec">the pick</span></span><span class="item-time">~€115–180</span></div><div class="item-detail">A genuine restored Moorish house from the 1400s in the old Albaicín quarter, built around a courtyard pool of still water, with Alhambra views. Its restoration won a European heritage prize. Sleeping here is part of seeing Granada, not just a bed near it. One practical note: the Albaicín is stairs and cobblestones — the walk in with tennis bags is real but short from the lower edge, where this sits.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Cuevas El Abanico — sleep in a cave <span class="chip w">eyes open</span></span><span class="item-time">~€90–140</span></div><div class="item-detail">Five whitewashed caves carved into the Sacromonte hillside, with a terrace facing the Alhambra lit up at night. Unforgettable is guaranteed. So are the trade-offs: thin walls, night noise from the lane, no air conditioning, and the steepest luggage haul in the city — taxis cannot reach the door. After a week of tennis, know what you are signing up for.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Parador de Granada <span class="chip u">check first if B wins</span></span><span class="item-time">~€230–330</span></div><div class="item-detail">A 15th-century convent inside the Alhambra's walls, converted into a hotel — you wake up inside the monument itself and eat breakfast overlooking the Generalife gardens. It is the most in-demand historic hotel in Spain and books out months ahead. If ending B wins, checking its availability is the first move, even before the Alhambra tickets — because if there is a room, it is worth breaking the budget band once. The no-drama fallback in town is Hotel Anacapri, an 18th-century townhouse by the Cathedral with zero stairs, around €80 to 130.</div></div>
+        </div>
+
+        <div class="sec-label">If the beds alone decided A or B</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Granada wins the lodging contest</span><span class="item-time">for what it's worth</span></div><div class="item-detail">Madrid's picks are excellent hotels you could find versions of in any great city. Granada's are the trip itself — a Moorish house, a cave, a converted convent inside the Alhambra. The derby-versus-Alhambra question is still the bigger one, and it belongs to Hans and Dan's call. But if that call is close, the beds break the tie toward Granada.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">The booking order, when it starts</span><span class="item-time">sequence</span></div><div class="item-detail">First the Murcia parade night — the scarce one. Then the València base. Dan books his Altafulla nights on his own card whenever he is ready. The ending's beds wait for the A-or-B call, and camp needs nothing beyond the rooming question at payment.</div></div>
+        </div>
+      </section>
+
+      <!-- ═══════════ 06 LUCKY TIMING ═══════════ -->
+      <section class="tabpanel" data-panel="finds" style="display:none">
+        <div class="whatis"><span class="w-l">What this tab is</span>
+          <p>We checked what is actually happening in Spain during your exact dates. The short version: the calendar is being weirdly generous to this trip. Here is what we found, and what each thing means.</p></div>
+
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">A Madrid derby lands the day after camp <span class="chip v">confirmed</span></span><span class="item-time">Sun Sept 20</span></div><div class="item-detail">Atlético against Real Madrid, the day after camp ends, three hours up the train line. It is also the last league soccer before a two-week break. This is the anchor of ending A.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">You arrive on Murcia's biggest day of the year <span class="chip v">confirmed</span></span><span class="item-time">Sat Sept 12</span></div><div class="item-detail">Murcia's yearly fair runs the first two weeks of September, and its giant parade happens on the 12th — the evening you arrive. The fair's closing bullfights run September 13 to 15, which are camp's first days.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Formula 1 comes to Madrid — a warning, not a plan <span class="chip v">confirmed</span></span><span class="item-time">Sept 11–13</span></div><div class="item-detail">Madrid hosts its first-ever Grand Prix that weekend, with over 100,000 people a day. Hotel prices explode. The rule it creates is simple: if your flight routes through Madrid early, land by the 9th and keep moving.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Camp week comes wrapped in three festivals <span class="chip v">confirmed</span></span><span class="item-time">Sept 13–20</span></div><div class="item-detail">The Murcia fair finishes during camp's first days. La Manga's own small beach festival runs the 16th to the 20th, right where you sleep. And Cartagena's big Romans-versus-Carthaginians festival starts the 18th, thirty minutes away. Free evening entertainment all week without planning anything.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Ibiza took itself off the list <span class="chip w">likely</span></span><span class="item-time">parties Sept 26+</span></div><div class="item-detail">Every big closing party falls after you fly home. That is why the final-days choice is now a clean A or B.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">August 27 could hand Dan a bonus <span class="chip u">pending</span></span><span class="item-time">soccer draw</span></div><div class="item-detail">The Champions League is Europe's biggest club soccer tournament. Its opening games run September 8 to 10, and a drawing on August 27 decides who plays at home. If Barcelona gets a home game, it lands during Dan's solo days there. We check the drawing and tell him.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Will Carlos actually be there? <span class="chip w">unknown</span></span><span class="item-time">worth asking</span></div><div class="item-detail">Alcaraz is confirmed to play the Laver Cup in London the weekend right after your camp, and he reportedly skipped Spain's Davis Cup team with a wrist problem. So his schedule that week is in motion. When the balance gets paid, we ask the academy directly whether he will be around during your week.</div></div>
+        </div>
+      </section>
+
+      <!-- ═══════════ 04 THINGS TO DO ═══════════ -->
+      <section class="tabpanel" data-panel="options" style="display:none">
+        <div class="whatis"><span class="w-l">What this tab is</span>
+          <p>The full menu for the trip, sorted the way you actually choose: what to see, what to eat, where the nights go, and the off-the-grid local stuff. Two tags to watch: <span class="chip plan">in the plan</span> means Day by Day already schedules it, with the day named. <span class="chip rec">Álvaro says go</span> means it is NOT in the plan — but I think you'd regret missing it, so find it a slot.</p></div>
+
+        <div class="sec-label">See &amp; experience</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">City of Arts at sunset <span class="chip plan">in the plan · Fri 11</span></span><span class="item-time">free</span></div><div class="item-detail">The white futuristic buildings you see in every València photo. The museums inside are skippable. The move is the free walk around the outside at 6 or 7 in the evening, when the white shells turn gold. Pair it with a beach hour — the sea is still about 25 degrees in September.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Roca Rey at the fair — the big night out <span class="chip plan">in the plan · Tue 15</span></span><span class="item-time">sun €25–40</span></div><div class="item-detail">A bullfight at Murcia's ring, about 45 minutes from camp. Roca Rey is the superstar of bullfighting right now — roughly what Alcaraz is to tennis — and this is the fair's closing show. Whatever you end up thinking about bullfighting, this is Spain at full volume with its biggest star. Sun seats run about €25–40 for a star lineup like this; shade seats cost more and are worth it. Online sales add a €12 fee; the ring's box office opens September 1. The night before has two of the sport's living legends if Tuesday doesn't work.<details class="more"><summary>Learn more — what a corrida actually is</summary><div class="deep">Six bulls, three matadors, two bulls each, about twenty minutes per bull. Each fight runs in three acts: the opening capework and the picador's lance, then the banderillas, then the matador alone with the small red cape and the sword. The crowd judges everything — a great performance earns waving white handkerchiefs and, if the president agrees, an ear. It is intense, formal, and bloody. Some people find it unforgettable, some find it unwatchable, and both reactions are normal — you can leave whenever you want. "Sol" means sun seats and "sombra" means shade; shade costs more because the September evening sun is no joke.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Cartagena's Romans festival <span class="chip plan">in the plan · Fri 18</span></span><span class="item-time">free</span></div><div class="item-detail">Cartagena is the old port city thirty minutes from camp, founded by Carthage over two thousand years ago. Every September the whole town splits into Roman and Carthaginian armies and re-fights that history for ten days — torchlit parades, staged battles, and feast camps you can walk through. Almost no foreign tourists know it exists. It opens on your last two camp nights.<details class="more"><summary>Learn more — the real history underneath</summary><div class="deep">Cartagena was founded around 227 BC as Qart Hadast — "New City" — the Carthaginian capital in Spain, and Hannibal launched his march on Rome from this harbor, elephants and all. Rome's general Scipio took the city in 209 BC in one of the boldest raids of the ancient world. The festival re-stages all of it: the founding, Hannibal's wedding, the Roman landing, the battles. Locals join "troops and legions" the way other towns join sports clubs, and the feast camps in the middle of town are open to anyone who wanders in.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">The Roman theater in Cartagena <span class="chip rec">Álvaro says go</span></span><span class="item-time">Tue free 6–8pm · else €7</span></div><div class="item-detail">A two-thousand-year-old Roman theater that sat forgotten underneath the city until 1988. It is one of Spain's great archaeological wows. Every Tuesday the last two hours are free. It pairs naturally with a Cartagena dinner.<details class="more"><summary>Learn more — the city that forgot its theater</summary><div class="deep">Rome built this 7,000-seat theater around 5 BC under Emperor Augustus. As the city grew, the theater vanished completely — a market, a fishermen's quarter, and eventually a cathedral were built literally on top of it. Nobody knew it existed until 1988, when construction work hit carved stone. The excavation took twenty years, and the museum route now walks you from street level down through the layers of the city and out into the restored theater. One of Spain's great archaeological surprises.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Ending A highlights <span class="chip plan">in the plan if A wins</span></span><span class="item-time">Madrid</span></div><div class="item-detail">The derby (about €100–250 resale). The Prado and Reina Sofía museums in their free evening hours. The Sésamo cave bar. And a big Spanish pop reunion concert on the Tuesday if you're still in town (€40–80).</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Ending B highlights <span class="chip plan">in the plan if B wins</span></span><span class="item-time">Granada</span></div><div class="item-detail">The Alhambra palace (about €20, book by late August). Cave flamenco in Sacromonte (€25–60). The free sunset lookout over the whole thing from the old quarter.</div></div>
+        </div>
+
+        <div class="sec-label">Eat &amp; drink</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Casa Carmela — the one big meal <span class="chip plan">in the plan · Sat 12</span></span><span class="item-time">€50 each</span></div><div class="item-detail">A paella house on the beach that has been cooking over orange-wood fires since 1922. Paella was invented in this city, and this is the best version of it. It is lunch only, and you phone in your paella order a day ahead — that is the tradition. Everything else on this trip is cheap so this one meal can happen. It books out weeks ahead. The cheap fallback is a local rice house at €20 to €25.<details class="more"><summary>Learn more — why this place</summary><div class="deep">Casa Carmela opened in 1922 as a beach shack where families changed into swimsuits and someone's grandmother cooked rice. A century later the same family still cooks every paella over burning orange wood from the orchards outside the city — the orthodox way, and the reason for a smoke flavor a gas burner can't fake. The thing to fight over is the socarrat: the toasted, caramelized crust of rice at the bottom of the pan. And note that paella here is lunch, never dinner — Valencians consider evening paella a tourist tell.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">The Albufera — where paella comes from <span class="chip plan">in the plan · Sat 12</span></span><span class="item-time">€20–30 each</span></div><div class="item-detail">A big lagoon thirty minutes south of the city, surrounded by rice fields. You take a €5 flat-bottom boat ride from the fishing village, then eat the local eel-and-potato stew for lunch. The tour companies sell this exact trip for €40 to €65. Doing it yourself costs a third of that, and sunset over the lagoon is the best free show in València.<details class="more"><summary>Learn more — why paella starts here</summary><div class="deep">This lagoon is why paella exists. The rice paddies around it have been farmed since the Moors engineered the irrigation a thousand years ago, and paella began as the field workers' lunch — rice, rabbit, snails, and beans cooked flat over a fire. El Palmar was a village of eel fishermen, which is why its own dish is all i pebre: eel in garlic and paprika. The flat-bottomed boats you ride were their working boats. Sunset here, with the rice fields going gold, is the oldest landscape in the region.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Breakfast at Central Bar <span class="chip plan">in the plan · Fri 11</span></span><span class="item-time">about €10</span></div><div class="item-detail">València has a sacred mid-morning meal: a big filled roll with a drink and olives. The best place to have it is a counter inside the city's beautiful old market hall, run by a Michelin-starred chef. A Michelin chef's sandwich in a hundred-year-old market for ten euros. Go at 9:30 when it opens, because the line builds fast.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Caldero at the Cabo de Palos port <span class="chip plan">in the plan · Wed 16</span></span><span class="item-time">€20–35 est</span></div><div class="item-detail">Caldero is the local fishermen's rice, cooked in a rich broth made from the catch. The two port restaurants that do it right are La Tana and Bocana de Palos, both on the little harbor thirty minutes from camp. Walk out to the lighthouse for sunset first, then eat. This is the camp region's best food night.</div></div>
+        </div>
+
+        <div class="sec-label">Nightlife — wanna get weird</div>
+        <div class="sec-note">Two vigorous single men deserve a menu. Nothing below gets scheduled; it exists so the option is always in your pocket. Camp-week law stands: nothing stupid the night before training.</div>
+
+        <div class="sec-label">València · Sept 10–12 · the big window (Thu–Sat)</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">The Ruzafa crawl <span class="chip v">verified</span></span><span class="item-time">every night</span></div><div class="item-detail">Your home neighborhood is also the best bar district in the city. The rhythm: one drink and one plate per stop, then move. El Encuentro for cheap beer and croquetas, Bar Tomate for vermouth, Café Berlin and La Bella de Cádiz for cocktails, Olhöps for craft beer. It runs late without ever turning into a scene you have to dress for.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">El Carmen after midnight <span class="chip v">verified</span></span><span class="item-time">Fri/Sat</span></div><div class="item-detail">The medieval quarter has the highest late-night bar and club density in València, centered on Plaça del Tossal. This is the "one big night out" district — start with tapas, end somewhere with a dance floor at 3am. Real note: pickpockets work these lanes late. Phones in front pockets.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">L'Umbracle / Mya <span class="chip v">verified</span></span><span class="item-time">Thu–Sat · ~€12–20</span></div><div class="item-detail">An open-air club built under the arches of the City of Arts — dancing under palm trees inside a piece of futuristic architecture, with an indoor club (Mya) attached. Confirmed running Thursday through Saturday, until seven in the morning — which is exactly your window. Entry runs about €12 to €20 with a drink. Dress code is real: no sportswear, no beachwear.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Marina Beach Club <span class="chip plan">on Thu 10's menu</span></span><span class="item-time">€15–30 · Thu hack</span></div><div class="item-detail">A beachfront club-restaurant — daybeds, DJs, sunset sessions that roll straight into the night club, and if you're inside you can stay through. Entry is €15 to 30. The verified hack: on Thursdays, spend €30 each at its El Portet restaurant and club entry is free — and Thursday is your first night in town.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Radio City <span class="chip v">verified</span></span><span class="item-time">daily · 8pm–4am</span></div><div class="item-detail">The El Carmen institution — the barrio's oldest pub, running since 1979, live acts and DJs every night until four. It's where the old-town crawl naturally ends when you don't feel like a proper club.</div></div>
+        </div>
+
+        <div class="sec-label">Camp week · Sept 13–19 · the honest print</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">The festivals ARE the nightlife <span class="chip plan">in the plan · Fri 18</span></span><span class="item-time">all week</span></div><div class="item-detail">The region quiets down after peak summer — but your week is the exception. The feria's last nights run in Murcia as camp starts, La Manga's own party runs at Plaza Bohemia from the 16th, and then the best one: Cartagena's festival camp. Verified: the nighttime campamento is free and open to all visitors every night from the 18th — a rebuilt ancient camp where fifty "troops and legions" run their own bars until very late, and they'll even stage a mock Carthaginian wedding for visitors. The most distinctive night out of the entire trip, and it costs nothing.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Murcia after the bulls <span class="chip v">verified</span></span><span class="item-time">first camp nights</span></div><div class="item-detail">One honest date note: the feria's open-air dance parties wind down around the 13th or 14th, so camp catches the tail of the party, not its peak — the parade on your arrival night is the real climax. What holds all week: the tapas lanes around Plaza de las Flores, the classic pre-and-post-bullring hub. If you do the Roca Rey night, one round there before the drive home is the move.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">The strip's Zoco zone <span class="chip w">seasonal</span></span><span class="item-time">past peak</span></div><div class="item-detail">La Manga's sandbar strip has a nightlife zone of about a hundred bars and clubs. In mid-September it should still be alive — the season's tail — but past its August peak, and this coast shuts down fast once the season ends. Fine for a casual night on the strip; don't build a big night on it. The festivals above carry the week easily.</div></div>
+        </div>
+
+        <div class="sec-label">The endings · Sept 20–22</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Ending A — Madrid: Kapital <span class="chip v">verified</span></span><span class="item-time">Sun yes · Mon CLOSED</span></div><div class="item-detail">Teatro Kapital is the famous one: a seven-floor former theater near Atocha where every floor plays different music, from reggaeton to house to a rooftop terrace. Verified detail that matters: it runs Wednesday through Sunday only — so derby Sunday (Sept 20, open 11pm to 5:30am) works perfectly, and Monday does not. Dress code is enforced: no sneakers, no sportswear, no shorts. Cocktails €12–18. Touristy, expensive, and still a spectacle worth doing once.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Ending A — Madrid: the rooftops <span class="chip w">good picks</span></span><span class="item-time">€5–10 entry</span></div><div class="item-detail">September is prime rooftop weather in Madrid. The value pick: the Círculo de Bellas Artes rooftop, €5 entry for the iconic view down Gran Vía. Bigger versions: Picalagartos (360 degrees, cocktails €14–18) and the Riu 360, the tallest one (€8–10 entry). A rooftop round before dinner is the easiest good decision in this city.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Ending A — Madrid: the bar districts <span class="chip v">verified</span></span><span class="item-time">every night</span></div><div class="item-detail">Malasaña has the rawest bar energy in the city — dives, indie crowds, no dress code. La Latina's Cava Baja street is the classic tapas-bar crawl. And the Letras quarter around Plaza Santa Ana runs lively past midnight, ending underground at Sésamo. Madrid genuinely does not sleep — dinner at 10, out at 1 is normal here.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Ending B — Granada: free tapas and caves <span class="chip v">verified</span></span><span class="item-time">~€2 a round</span></div><div class="item-detail">Granada is not a club city — its thing is better: it's one of the last places in Spain where every drink comes with a free tapa, no choosing, about €2 for a beer-and-tapa round. The crawl streets are Calle Navas and Calle Elvira; the named stops are Bar Los Diamantes (seafood), Bodegas Castañeda (unchanged since the 1920s), and La Abadía. After the flamenco, the Sacromonte cave clubs run late — current hours unconfirmed, so that one gets checked the same week.</div></div>
+        </div>
+
+        <div class="sec-label">Dan's Barcelona solo nights · Sept 5–8</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Paradiso <span class="chip v">verified</span></span><span class="item-time">El Born · #4 in the world</span></div><div class="item-detail">A speakeasy hidden behind a pastrami-shop fridge door — currently ranked number four on the World's 50 Best Bars list. How to get in: a free virtual queue opens at 3pm daily (scan the QR at the door, then wander until your slot), or reserve a table with a €30–60 deposit per person. Cocktails run about €20 and there's a secret room behind the bathroom mirror. Dan's one fancy-drink night, sorted.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Razzmatazz <span class="chip v">verified</span></span><span class="item-time">Sat Sept 5 · ~€15</span></div><div class="item-detail">Barcelona's legendary five-room club — five dance floors, five sounds, one ~€15 ticket — in the same neighborhood as Dan's street festival. The verified schedule matters: club nights are Wednesday, Friday, and Saturday. For Dan's dates that means Saturday September 5, his arrival night, is the one — or the Sunday-afternoon techno session if a red-eye landing says no.</div></div>
+        </div>
+
+        <div class="sec-label">The one guard</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Late-night rules that keep the trip good</span><span class="item-time">always</span></div><div class="item-detail">Nightlife districts are where pickpockets work — phones in front pockets, never on tables. Watch your drinks like you would anywhere. Pre-book or pre-hail the ride home before you're the person negotiating at 4am. And camp week's law stands: the big nights live on the festival calendar, not the night before a training morning.</div></div>
+        </div>
+        <div class="sec-label">Off the grid &amp; local weird</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Calblanque — the secret beaches <span class="chip plan">rest-day menu</span></span><span class="item-time">free</span></div><div class="item-detail">A protected park twenty minutes from La Manga. Wild golden coves with no buildings at all — the beaches locals keep quiet about. If the camp gives you a free day, this is what it is for. The summer shuttle should be done by then, so you can likely drive right in.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Tabarca — the one island that fits <span class="chip plan">rest-day menu</span></span><span class="item-time">~€20 boat</span></div><div class="item-detail">You asked about islands. This is the only one that fits the trip: a tiny car-free island about an hour up the coast, with an old walled pirate-refuge village and Spain's oldest marine reserve around it. The boat over takes thirty minutes and costs about €15 to €20 round trip. The island's famous lunch is caldero, a fisherman's rice dish. It needs the rental car and a free day, and we check the boat schedule before counting on it.<details class="more"><summary>Learn more — pirates, then fishermen</summary><div class="deep">For centuries this island was a hideout for Barbary pirates raiding the coast. King Carlos III walled it in the 1770s and settled it with Genoese fishing families he had ransomed from captivity in Tunisia — their surnames are still on the doors. It became Spain's first protected marine reserve in 1986, which is why the water is so clear. The island dish is caldero: rice cooked in a rich fish broth the fishermen made from the catch they couldn't sell.</div></details></div></div>
+          <div class="item"><div class="item-head"><span class="item-title">The Mar Menor mud baths <span class="chip rec">Álvaro says go</span></span><span class="item-time">free · very weird</span></div><div class="item-detail">At Lo Pagán, on the lagoon's north tip, the old salt flats have free open-air mud baths. You paint yourself in mineral mud, stand in the sun until you dry like a statue, rinse off in the salt lagoon, then swim. No booking, no facilities, locals everywhere. Bring a swimsuit you don't love — the mud stains. As off-the-grid as this coast gets.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Snorkel boat over the Islas Hormigas reef <span class="chip rec">Álvaro says go</span></span><span class="item-time">rest day</span></div><div class="item-detail">Cabo de Palos sits on a protected marine reserve rated among the best dive spots in the Mediterranean. You don't need any license to snorkel — the local dive shops run boat trips out over the reef, and that's where the good stuff is. Scuba needs certification; snorkeling just needs a morning. Book a day ahead at the port.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">La Manga's own festival <span class="chip plan">on Wed 16's menu</span></span><span class="item-time">free</span></div><div class="item-detail">La Manga is the strip of sand you may be sleeping on — a warm shallow lagoon on one side, the open sea on the other. Its own small town festival runs during camp week with live music and food stands. Zero effort, zero cost, right on the doorstep.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">A Real Murcia match <span class="chip plan">Sat 19 option</span></span><span class="item-time">€15–25</span></div><div class="item-detail">Cheap third-division soccer in a 31,000-seat stadium with a big loud loyal crowd. The anti-tourist night out for your last camp evening, if the mood strikes.</div></div>
+        </div>
+
+        <div class="sec-label">Looked at hard, and cut on purpose</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">The islands: Ibiza, Mallorca, Menorca</span><span class="item-time">cut</span></div><div class="item-detail">Your question, answered straight. Ibiza's September draw is the closing parties, and they all start after you are home. Mallorca and Menorca each cost a flight plus half a day of travel each way, inside a two-week trip, for beaches you already have. Remember where you are sleeping: a sandbar between two seas, with wild coves twenty minutes away and Tabarca a boat ride up the coast. The island feeling is already built into camp week.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Sevilla, Córdoba, San Sebastián, the Rioja wine festival</span><span class="item-time">cut</span></div><div class="item-detail">All wonderful, all too far. Each needs its own dedicated trip leg, and a camp-anchored two-week trip can't fund one without gutting the València days. The Rioja harvest festival hurts most — it is exactly your dates, just at the wrong end of the country.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">La Mercè, Barcelona's biggest festival</span><span class="item-time">near miss</span></div><div class="item-detail">It runs September 23 to 27. You would catch only its first hours and miss the fireworks finale. Not worth bending the route.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">The Albacete fair</span><span class="item-time">only if driving</span></div><div class="item-detail">A big traditional fair in a city that happens to sit between València and the camp region, running September 7 to 17. Only makes sense if that leg happens by car. By train, skip it.</div></div>
+        </div>
+      </section>
+
+      <!-- ═══════════ 06 THE FINE PRINT ═══════════ -->
+      <section class="tabpanel" data-panel="fine" style="display:none">
+        <div class="whatis"><span class="w-l">Part one — deadlines</span>
+          <p>Everything practical lives here, in three parts: the deadlines with expiry dates (nearest first — red cards are live now), then the money picture, then the questions still open. Trip stuff only, for the whole crew.</p></div>
+
+        <div class="clockcard">
+          <div class="item-head"><span class="item-title">The academy question list — ask when paying</span><span class="item-time">NOW</span></div>
+          <div class="item-detail">Camp payments go through the academy's player link, and the payment moment is the moment to ask questions. The big ones: what the daily schedule looks like and which evenings are free, what excursions the camp has planned, whether airport transfers are included and from which airport, whether all meals are covered, what the included insurance actually covers, how the rooming works, and whether Carlos himself will be around that week.</div>
+        </div>
+        <div class="clockcard">
+          <div class="item-head"><span class="item-title">Alhambra tickets — this forces the A or B choice</span><span class="item-time">now → late Aug</span></div>
+          <div class="item-detail">Palace tickets for September 20 to 22 sell out four to eight weeks ahead. The A-or-B decision has to happen inside this window. If it doesn't, ending B removes itself by selling out.</div>
+        </div>
+
+        <div class="sec-label">Then, in order</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Cheap train window opens</span><span class="item-time">~Aug 18–19</span></div><div class="item-detail">Spanish trains price like airlines. The same seat costs about €29 three weeks out and about €145 last minute. The cheap window for your early-September trains opens mid-August. Book within days of the dates locking. Use the Trainline or Omio apps — the official Spanish site rejects most US cards.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">The soccer drawing</span><span class="item-time">Aug 27</span></div><div class="item-detail">One check that day: did Barcelona get a home Champions League game for September 8 to 10, during Dan's Barcelona days? If yes, we tell him.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">The fair's concert lineup comes out</span><span class="item-time">late Aug</span></div><div class="item-detail">Murcia's fair runs free concerts every night on its main stage. The lineup posts in August. We scan it for your arrival weekend.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Bullfight tickets go on sale at the ring</span><span class="item-time">Sept 1</span></div><div class="item-detail">Buy the Roca Rey tickets once you know the camp's evening schedule, so the big night out doesn't collide with training. An official reseller called Servitoro already sells them online.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Derby tickets, if you pick ending A</span><span class="item-time">early Sept</span></div><div class="item-detail">Sales open two to three weeks before the match and club members get first grab. After that it is resale sites at about €100 to €250. Move early.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Check the standby loads</span><span class="item-time">~2 weeks out</span></div><div class="item-detail">Hans holds the passes and picks his own flights. About two weeks before flying he checks how full the Delta flights look and sets his targets. If the loads look crazy, he leaves a day earlier or adds a buffer day.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Before the trip — everyone</span><span class="item-time">pre-trip</span></div><div class="item-detail">Three small things for each traveler. Travel insurance, about $60 to $100 — the September storm risk on this coast makes it a must. A phone data plan (an eSIM from Airalo or Holafly, $20 to $30) to skip roaming fees. And a passport check: valid six months past the trip.</div></div>
+        </div>
+
+        <div class="whatis"><span class="w-l">Part two — the money</span>
+          <p>What the trip costs and where the savings hide. The rule this whole plan runs on: in Spain the best things are cheap and the worst things are expensive. Markets, festivals, and early train tickets are cheap. Airport taxis, tourist-trap paella, and anything booked late are expensive.</p></div>
+
+        <div class="anchorcard" style="margin-top:0">
+          <div class="sec-label">What the days around camp cost</div>
+          <p>The camp package covers its own week. The six travel days around it cost roughly $900 to $1,200 per person at the lean level, or $1,500 to $2,000 living comfortably. This plan is built to feel rich at the lean level, because the best parts of it — the festivals, the beaches, the free museum hours — cost nothing. The levers below are how the lean version stays great.</p>
+        </div>
+
+        <div class="sec-label">The big numbers</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">The camp package</span><span class="item-time">per player</span></div><div class="item-detail">Each player's package covers the full camp week — training, lodging, and meals. Balances get paid through the academy's player link, and paying is the moment to ask the question list over in Deadlines.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Daily spending, per person</span><span class="item-time">€55–135</span></div><div class="item-detail">Lean is €55 to €75 a day: market food, one paid activity, walk everywhere. Comfortable is €100 to €135: restaurant dinners and taxis when tired. Camp days cost almost nothing extra since meals are included.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Rooms, for two people</span><span class="item-time">€70–130/night</span></div><div class="item-detail">València runs €70 to €120 a night. Madrid about €80 to €130. Granada is cheapest at €60 to €100. Camp week lodging is inside the package. These split two ways.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">If Hans's standby fails completely</span><span class="item-time">$400–500</span></div><div class="item-detail">A paid one-way ticket is the worst case. It is not the plan. It is just the known ceiling so nothing panics.</div></div>
+        </div>
+
+        <div class="sec-label">The savings levers, biggest first</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">1 · Book trains three weeks early</span><span class="item-time">saves ~€100 per ride</span></div><div class="item-detail">The same seat costs €29 early and €145 late. This is the single biggest lever on the board. Your racquet bag goes on as a €10 add-on when you buy the ticket — never pay the €25 to €50 fee at the gate.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">2 · Choose your one splurge</span><span class="item-time">€50 once</span></div><div class="item-detail">Casa Carmela once, on purpose. And zero tourist-plaza paellas — €25 for a bad microwaved version is the classic tax on unprepared visitors.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">3 · Never take airport taxis</span><span class="item-time">€5 vs €35</span></div><div class="item-detail">The airport bus into Madrid costs €5.10. A taxi costs €35. Commuter trains beat taxis everywhere. Airport taxis are the worst money in Spain.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">4 · Ride the free layer hard</span><span class="item-time">€0</span></div><div class="item-detail">Every festival on this trip is free to stand in. Madrid's great museums are free in the evenings. The sunset architecture walk, both city beaches, the lookout in Granada — the actual memory-makers mostly cost nothing. That is why the lean budget works.</div></div>
+        </div>
+
+        <div class="sec-label">Still needs a live quote</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">The rental car</span><span class="item-time">~€150–220 for 5 days</span></div><div class="item-detail">You said probably yes, at least for part of the week — good call. The math agrees: one late-night festival taxi back to La Manga costs about €100, so two festival nights nearly pay for the whole car, and it unlocks the beaches and Cartagena freely. We pull live quotes once dates lock.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Travel insurance</span><span class="item-time">~$60–100</span></div><div class="item-detail">Quoted at booking. Not optional this trip — see the storm note in Open Questions.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Phone data</span><span class="item-time">~$20–30</span></div><div class="item-detail">An eSIM bought before flying. Skips US roaming fees entirely.</div></div>
+        </div>
+
+        <div class="whatis"><span class="w-l">Part three — open questions</span>
+          <p>What we still don't know, who answers it, and the safety rules that protect the trip. Nothing gets booked past an open question. This tab empties as the answers come in, and when it is empty, we book.</p></div>
+
+        <div class="sec-label">Still open</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">1 · Ending A or B? <span class="chip u">open</span></span><span class="item-time">Hans + Dan · by late Aug</span></div><div class="item-detail">Madrid with the derby, or Granada with the Alhambra. Day by Day has the full comparison. The Alhambra ticket window forces this decision by late August. This is the number one thing to discuss on this board.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">2 · How full are the flights? <span class="chip w">check later</span></span><span class="item-time">~2 weeks out</span></div><div class="item-detail">Not a mystery, just standby life. The camp dates are fixed and the plan around them is set: Hans out around the 9th, home around the 22nd, one retry day on each end. About two weeks before flying he checks the loads and picks flights. If they look bad, he leaves a day earlier or routes through Madrid early, and maybe adds a buffer day.</div></div>
+        </div>
+
+        <div class="sec-label">Answered — settled and off the worry list</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Where the camp is</span><span class="item-time">✅ settled</span></div><div class="item-detail">You read it straight off the booking page: the venue is the Carlos Alcaraz Academy at The Racquets Club, inside La Manga Club. That locks the geography. Cartagena is the closer train station, Murcia city is about 45 minutes away, the wild Calblanque beaches are 15 to 20 minutes, and the La Manga strip is on the doorstep.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Dan is playing</span><span class="item-time">✅ settled</span></div><div class="item-detail">He bought his own camp spot with his own money. The old "player or spectator" question is dead.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">The rental car</span><span class="item-time">✅ probably yes</span></div><div class="item-detail">Your call: probably, at least for part of the week. It gets booked with live quotes once dates lock.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">The flight plan shape</span><span class="item-time">✅ settled</span></div><div class="item-detail">Three days before camp, three days after, one standby retry day at each end. Nobody else needs to do anything — you hold the passes and you pick the flights.</div></div>
+        </div>
+
+        <div class="sec-label">To sort out together</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">Ask the academy</span><span class="item-time">at payment</span></div><div class="item-detail">What excursions are planned and which evenings are free. Airport transfers, and from which airport. Meals. Insurance. Rooming. And whether Carlos will be there.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Hans + Dan: pick the ending, sort the car</span><span class="item-time">this week</span></div><div class="item-detail">Ending A or B — the Alhambra ticket clock forces the call by late August. And the rental car split: the lean is yes, at least for part of camp week, because one late-night festival taxi costs about €100 and the car unlocks the beaches and Cartagena.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Dan, Jamie — ideas welcome</span><span class="item-time">anytime</span></div><div class="item-detail">This board is shared so the three of us can plan together. If you see something worth adding, doing, eating, or changing — a place, a night, a detour — tell Hans and it goes on the board.</div></div>
+        </div>
+
+        <div class="sec-label">The safety rules</div>
+        <div class="rows">
+          <div class="item"><div class="item-head"><span class="item-title">The camp is untouchable</span></div><div class="item-detail">Latest safe arrival in the region is September 12. The retry day at the end stays empty. Any idea that threatens either edge dies, no matter how fun it sounds.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">September storms are real on this coast</span></div><div class="item-detail">This exact coast gets sudden violent September storms — locals call them the gota fría. In 2019 one flooded Murcia on September 12 to 14, these literal calendar dates. It is not a reason to worry, just a reason to prepare: keep Spain's weather app on your phones, never park or walk in a dry riverbed during a storm alert, and carry the travel insurance.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">The border is slower now</span></div><div class="item-detail">Europe started fingerprint-and-photo entry checks in 2026. Your first landing in Europe can take noticeably longer than it used to. Leave generous time on the first connection.</div></div>
+          <div class="item"><div class="item-head"><span class="item-title">Booking rules that save pain</span></div><div class="item-detail">Book Spanish trains through the Trainline or Omio apps, because the official site rejects most US cards. The train to the camp region has only about three departures a day, so book it early and flexible. And Spanish rail workers have gone on strike several times this year with a few weeks' notice — we recheck before travel.</div></div>
+        </div>
+      </section>
+
+
+    </div></div>
+    <div class="cardfoot">A shared board for Hans, Dan &amp; Jamie · camp dates are fixed, the days around them flex with standby · updated Aug 10, 2026 — Álvaro</div>
+  </div>
+</div>
+
+<script>
+  const TITLES = { spine: 'The Plan', tl: 'Day by Day — the whole trip, every option', map: 'The Map', stay: 'Places to Stay — every bed, pitched', options: 'Things To Do', finds: 'Lucky Timing', fine: 'The Fine Print — deadlines · money · questions' };
+  const ORDER = ['spine','tl','map','stay','options','finds','fine'];
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.tabpanel');
+  const barTitle = document.getElementById('barTitle');
+  const barCount = document.getElementById('barCount');
+  const panelInner = document.getElementById('panelInner');
+
+  function activate(key) {
+    tabs.forEach(t => t.classList.toggle('on', t.dataset.tab === key));
+    panels.forEach(p => p.style.display = (p.dataset.panel === key) ? '' : 'none');
+    barTitle.textContent = TITLES[key];
+    barCount.textContent = 'tab ' + (ORDER.indexOf(key) + 1) + ' of ' + ORDER.length;
+    panelInner.classList.toggle('wide', key === 'map');
+    document.querySelector('.panel').scrollTop = 0;
+    document.body.dataset.tab = key;
+    try { history.replaceState(null, '', '#' + key); } catch (e) {}
+  }
+
+  tabs.forEach(t => t.addEventListener('click', () => activate(t.dataset.tab)));
+
+  const startKey = ORDER.includes((location.hash || '').slice(1)) ? location.hash.slice(1) : 'spine';
+  activate(startKey);
+</script>
+</body>
+</html>
