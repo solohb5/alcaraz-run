@@ -311,6 +311,14 @@
   .cover-ballbtn::before { left: -34%; border-left: none; }
   .cover-ballbtn::after  { right: -34%; border-right: none; }
   .cover-ballbtn span { position: relative; z-index: 1; }
+  .music-btn {
+    display: none; align-items: center; gap: 7px; margin: 18px auto 0;
+    background: none; border: 1.5px solid var(--ink-side-faint); color: var(--ink-side);
+    border-radius: 999px; padding: 7px 18px;
+    font-family: 'Alegreya', Georgia, serif; font-weight: 700; font-size: 13px; cursor: pointer;
+  }
+  .music-btn:hover { border-color: #F2EDE3; }
+  .cover-credit { margin-top: 14px; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-side-faint); animation: rise 500ms ease 950ms backwards; }
 
   /* phone layout — the board in your hand, mid-trip */
   @media (max-width: 820px) {
@@ -355,8 +363,11 @@
     <div class="cover-dots"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
     <p class="cover-sub">A week of tennis at the Carlos Alcaraz academy, and the trip of a lifetime wrapped around it. The whole plan is one click away.</p>
     <button class="cover-ballbtn" aria-label="Enter the board"><span>¡Vamos!</span></button>
+    <div><button class="music-btn" id="musicBtn" onclick="playMusic(event)">♪ play the music</button></div>
+    <div class="cover-credit">Asturias · Isaac Albéniz</div>
   </div>
 </div>
+<audio id="coverMusic" src="asturias.m4a" loop preload="auto"></audio>
 
 <div class="app">
 
@@ -887,43 +898,35 @@
 </div>
 
 <script>
-  // A soft Spanish-guitar phrase on the way in. Deterministic oscillator plucks,
-  // no feedback loops, and a hard master volume cap — gentle by construction.
-  let AC = null, MASTER = null;
-  function pluck(freq, when, dur, vol) {
-    const osc = AC.createOscillator(); osc.type = 'triangle'; osc.frequency.value = freq;
-    const lp = AC.createBiquadFilter(); lp.type = 'lowpass';
-    lp.frequency.setValueAtTime(2400, when);
-    lp.frequency.exponentialRampToValueAtTime(700, when + dur);
-    const g = AC.createGain();
-    g.gain.setValueAtTime(0.0001, when);
-    g.gain.exponentialRampToValueAtTime(vol, when + 0.012);
-    g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
-    osc.connect(lp); lp.connect(g); g.connect(MASTER);
-    osc.start(when); osc.stop(when + dur + 0.05);
+  // Asturias (Albéniz) plays low on the cover only — public-domain recording (Musopen).
+  // Browsers may block autoplay with sound; if so, a small play button appears.
+  const music = document.getElementById('coverMusic');
+  function playMusic(ev) {
+    if (ev) ev.stopPropagation();
+    music.volume = 0.22;
+    music.play();
+    const b = document.getElementById('musicBtn');
+    if (b) b.style.display = 'none';
   }
-  function flourish() {
-    try {
-      AC = AC || new (window.AudioContext || window.webkitAudioContext)();
-      if (AC.state === 'suspended') AC.resume();
-      if (!MASTER) {
-        MASTER = AC.createGain();
-        MASTER.gain.value = 0.16; // the ceiling — quiet, always
-        const comp = AC.createDynamicsCompressor();
-        MASTER.connect(comp); comp.connect(AC.destination);
-      }
-      const t0 = AC.currentTime + 0.05;
-      // a short falling Spanish phrase, then a soft E-major arpeggio to land on
-      const run = [659.25, 587.33, 523.25, 493.88];
-      run.forEach((f, i) => pluck(f, t0 + i * 0.13, 0.9, 0.5));
-      const chord = [329.63, 415.30, 493.88, 659.25];
-      chord.forEach((f, i) => pluck(f, t0 + run.length * 0.13 + 0.12 + i * 0.06, 1.6, 0.45));
-    } catch (e) { /* no audio, no problem — the door still opens */ }
+  if (music && document.getElementById('cover') && !location.hash) {
+    music.volume = 0.22;
+    const attempt = music.play();
+    if (attempt) attempt.catch(() => {
+      const b = document.getElementById('musicBtn');
+      if (b && document.getElementById('cover')) b.style.display = 'inline-flex';
+    });
+  }
+  function fadeOutMusic() {
+    if (!music || music.paused) return;
+    const fade = setInterval(() => {
+      music.volume = Math.max(0, music.volume - 0.025);
+      if (music.volume <= 0.002) { music.pause(); clearInterval(fade); }
+    }, 60);
   }
   function enterBoard() {
     const c = document.getElementById('cover');
     if (!c) return;
-    flourish();
+    fadeOutMusic();
     c.classList.add('gone');
     setTimeout(() => c.remove(), 600);
   }
