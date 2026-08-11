@@ -255,17 +255,27 @@
   @keyframes slowpush { from { transform: scale(1.14); } to { transform: scale(1.02); } }
   @keyframes barsin { from { transform: scaleY(0); } to { transform: scaleY(1); } }
   .cover.gone { opacity: 0; pointer-events: none; }
-  .cover-photo {
-    position: absolute; inset: 0;
-    background: url('mission.jpg') center 42% / cover no-repeat;
-    animation: slowpush 26s ease-out forwards;
+  .cover-video {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: center 42%;
+    filter: brightness(1.18) contrast(1.15) saturate(1.2);
   }
-  .cover-photo::after {
-    content: ''; position: absolute; inset: 0;
+  .cover-scrim {
+    position: absolute; inset: 0; pointer-events: none;
     background:
       linear-gradient(to bottom, rgba(4,6,10,0.55) 0%, rgba(4,6,10,0.05) 30%, rgba(4,6,10,0.12) 55%, rgba(4,6,10,0.88) 88%, #04060a 100%),
       radial-gradient(ellipse at center 40%, transparent 45%, rgba(4,6,10,0.55) 100%);
   }
+  .cover-loud {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 18px;
+    background: rgba(4,6,10,0.55); border: 1.5px solid rgba(232,177,75,0.75); color: #E8B14B;
+    border-radius: 999px; padding: 9px 22px;
+    font-family: 'Alegreya', Georgia, serif; font-weight: 700; font-size: 13.5px;
+    letter-spacing: 0.06em; cursor: pointer;
+    animation: rise 600ms ease 2400ms backwards;
+    transition: transform 150ms ease;
+  }
+  .cover-loud:hover { transform: scale(1.06); }
   .cover-bar { position: absolute; left: 0; right: 0; height: 7vh; background: #000; z-index: 2; animation: barsin 900ms ease both; }
   .cover-bar.top { top: 0; transform-origin: top; }
   .cover-bar.btm { bottom: 0; transform-origin: bottom; }
@@ -389,7 +399,8 @@
 <body data-tab="spine">
 
 <div class="cover" id="cover" onclick="enterBoard()">
-  <div class="cover-photo"></div>
+  <video class="cover-video" id="coverVideo" src="mission.mp4" poster="mission.jpg" autoplay muted loop playsinline></video>
+  <div class="cover-scrim"></div>
   <div class="cover-bar top"></div>
   <div class="cover-bar btm"></div>
   <div class="cover-inner">
@@ -398,6 +409,7 @@
     <h1 class="cover-title">We're going<br><span class="accent">to Spain.</span></h1>
     <p class="cover-sub">Seven days at the Carlos Alcaraz academy. The trip of a lifetime wrapped around it. The whole plan is one click away.</p>
     <button class="cover-ballbtn" aria-label="Enter the board"><span>¡Vamos!</span></button>
+    <div><button class="cover-loud" id="loudBtn" onclick="playLoud(event)">🔊 Play it loud</button></div>
     <div class="cover-billing">Starring Hans and Dan · Soundtrack by Kenny Loggins · Based on a true decision</div>
     <div><button class="music-btn" id="musicBtn" onclick="playMusic(event)">♪ play the music</button></div>
     <div class="cover-credit">Board music: Spanish Romance · trad. · Jim Greeninger</div>
@@ -1048,9 +1060,28 @@
     });
   }
   updateFab();
+  // the cover video ships with its real audio — muted until a human asks for it.
+  // Loud mode pauses the guitar; muting brings it back. Entering the board ends both.
+  function playLoud(ev) {
+    if (ev) ev.stopPropagation();
+    const v = document.getElementById('coverVideo');
+    const b = document.getElementById('loudBtn');
+    if (!v) return;
+    if (v.muted) {
+      v.muted = false; v.volume = 1; v.currentTime = 0; v.play();
+      music.pause();
+      if (b) b.textContent = '🔇 Okay, back to the guitar';
+    } else {
+      v.muted = true;
+      if (b) b.textContent = '🔊 Play it loud';
+      if (!userMuted) { music.volume = 0.2; music.play(); }
+    }
+  }
   function enterBoard() {
     const c = document.getElementById('cover');
     if (!c) return;
+    const v = document.getElementById('coverVideo');
+    if (v) v.muted = true;
     // entering is a real click, so a blocked autoplay can start here — unless they said no
     if (music.paused && !userMuted) { music.volume = 0.2; music.play(); }
     c.classList.add('gone');
