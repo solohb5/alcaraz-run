@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,700;0,800;1,400;1,500;1,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,700;0,800;1,400;1,500;1,700&family=Anton&display=swap" rel="stylesheet">
 <style>
   /* Bones: Sir Hans BOARD.html (the Pentagram ledger system). Nine rooms, one journey.
      Copy rule (Hans, 8/10): plain short sentences a human can read. No fragment grammar. */
@@ -242,56 +242,71 @@
   ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
 
-  /* the cover — one click in, just for fun */
+  /* the cover — the movie poster. Actual footage, maximum drama. */
   .cover {
     position: fixed; inset: 0; z-index: 100;
-    background-image: radial-gradient(rgba(242,237,227,0.05) 1px, transparent 1.2px);
-    background-size: 22px 22px;
-    background-color: var(--cream);
+    background: #04060a;
     display: flex; align-items: center; justify-content: center;
     text-align: center; padding: 24px;
     opacity: 1; transition: opacity 550ms ease;
-    cursor: pointer;
+    cursor: pointer; overflow: hidden;
   }
   @keyframes rise { from { transform: translateY(18px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  @keyframes settle { from { transform: rotate(-8deg) translateY(-44px) scale(1.06); opacity: 0; } to { transform: rotate(-2.5deg) translateY(0) scale(1); opacity: 1; } }
+  @keyframes slowpush { from { transform: scale(1.14); } to { transform: scale(1.02); } }
+  @keyframes barsin { from { transform: scaleY(0); } to { transform: scaleY(1); } }
   .cover.gone { opacity: 0; pointer-events: none; }
-  .cover-inner { max-width: 560px; }
-  .cover-print {
-    display: inline-block; background: #F2EDE3; padding: 9px 9px 6px; border-radius: 2px;
-    box-shadow: 0 16px 44px rgba(0,0,0,0.6);
-    transform: rotate(-2.5deg); margin: 0 auto 24px;
-    transition: transform 250ms ease;
-    animation: settle 700ms cubic-bezier(.2,1.4,.4,1) 100ms backwards;
+  .cover-photo {
+    position: absolute; inset: 0;
+    background: url('mission.jpg') center 42% / cover no-repeat;
+    animation: slowpush 26s ease-out forwards;
   }
-  .cover-print:hover { transform: rotate(-0.5deg) scale(1.02); }
-  .cover-print img { display: block; max-height: 34vh; max-width: min(70vw, 380px); width: auto; border-radius: 1px; }
-  .cover-print .print-cap { font-family: 'Alegreya', Georgia, serif; font-size: 12px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #34383C; padding: 8px 4px 4px; }
-  .cover-ball {
-    width: 22px; height: 22px; border-radius: 50%; margin: 0 auto 18px;
-    background: #D6E34B; border: 2.5px solid #F2EDE3; position: relative;
-    animation: bounce 2.4s ease-in-out infinite;
+  .cover-photo::after {
+    content: ''; position: absolute; inset: 0;
+    background:
+      linear-gradient(to bottom, rgba(4,6,10,0.55) 0%, rgba(4,6,10,0.05) 30%, rgba(4,6,10,0.12) 55%, rgba(4,6,10,0.88) 88%, #04060a 100%),
+      radial-gradient(ellipse at center 40%, transparent 45%, rgba(4,6,10,0.55) 100%);
   }
-  .cover-ball::before, .cover-ball::after {
-    content: ''; position: absolute; top: 3px; bottom: 3px; width: 7px;
-    border: 1.8px solid #FFFFFF; border-radius: 50%;
+  .cover-bar { position: absolute; left: 0; right: 0; height: 7vh; background: #000; z-index: 2; animation: barsin 900ms ease both; }
+  .cover-bar.top { top: 0; transform-origin: top; }
+  .cover-bar.btm { bottom: 0; transform-origin: bottom; }
+  .cover-inner { max-width: 680px; position: relative; z-index: 3; padding-top: 26vh; }
+  .cover-caption {
+    font-size: 10.5px; letter-spacing: 0.3em; text-transform: uppercase;
+    color: rgba(242,237,227,0.55); margin-bottom: 18px;
+    animation: rise 600ms ease 700ms backwards;
   }
-  .cover-ball::before { left: -2px; border-left: none; }
-  .cover-ball::after  { right: -2px; border-right: none; }
+  .cover-kicker {
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    font-size: 12.5px; font-weight: 700; letter-spacing: 0.32em; text-transform: uppercase;
+    color: #E8B14B; margin-bottom: 16px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.9);
+    animation: rise 600ms ease 1100ms backwards;
+  }
+  .cover-kicker::before, .cover-kicker::after {
+    content: ''; height: 2px; width: 44px; background: #B3402A; flex: 0 0 auto;
+    box-shadow: 0 4px 0 #E8B14B;
+  }
+  .cover-title {
+    font-family: 'Anton', 'Alegreya', sans-serif; font-weight: 400;
+    font-size: clamp(52px, 12vw, 124px); line-height: 0.98;
+    text-transform: uppercase; letter-spacing: 0.015em;
+    color: #F2EDE3; margin-bottom: 20px;
+    text-shadow: 0 4px 30px rgba(0,0,0,0.95), 0 0 80px rgba(232,177,75,0.25);
+    animation: rise 800ms cubic-bezier(.2,1,.3,1) 1500ms backwards;
+  }
+  .cover-title .accent { color: #E8B14B; }
+  .cover-sub {
+    font-size: 16.5px; line-height: 1.6; color: rgba(242,237,227,0.85);
+    max-width: 46ch; margin: 0 auto 28px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.9);
+    animation: rise 600ms ease 2100ms backwards;
+  }
+  .cover-billing {
+    font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase;
+    color: rgba(242,237,227,0.5); margin-top: 26px; line-height: 2;
+    animation: rise 600ms ease 2600ms backwards;
+  }
   @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-  .cover-kicker { font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-side-faint); margin-bottom: 14px; animation: rise 500ms ease 380ms backwards; }
-  .cover-title { font-family: 'Alegreya', Georgia, serif; font-weight: 800; font-size: clamp(40px, 9.5vw, 88px); line-height: 1.02; color: #F2EDE3; margin-bottom: 20px; animation: rise 600ms ease 480ms backwards; }
-  .cover-dots { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
-  .cover-dots span { width: 11px; height: 11px; border-radius: 50%; animation: dotpop 600ms ease backwards; }
-  .cover-dots span:nth-child(1) { background:#6E8CA0; animation-delay: 150ms; }
-  .cover-dots span:nth-child(2) { background:#A5885B; animation-delay: 250ms; }
-  .cover-dots span:nth-child(3) { background:#9A8F5F; animation-delay: 350ms; }
-  .cover-dots span:nth-child(4) { background:#6C918B; animation-delay: 450ms; }
-  .cover-dots span:nth-child(5) { background:#967486; animation-delay: 550ms; }
-  .cover-dots span:nth-child(6) { background:#6E8A64; animation-delay: 650ms; }
-  .cover-dots span:nth-child(7) { background:#A77062; animation-delay: 750ms; }
-  @keyframes dotpop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  .cover-sub { font-size: 16px; line-height: 1.6; color: var(--ink-side-faint); max-width: 42ch; margin: 0 auto 28px; animation: rise 500ms ease 700ms backwards; }
   /* the GO button is a tennis ball */
   .cover-ballbtn {
     width: 104px; height: 104px; border-radius: 50%; position: relative; overflow: hidden;
@@ -300,7 +315,7 @@
     font-family: 'Alegreya', Georgia, serif; font-weight: 800; font-size: 16px;
     letter-spacing: 0.05em; color: #0d1013;
     box-shadow: 0 14px 34px rgba(214,227,75,0.3);
-    animation: bounce 2.4s ease-in-out 1.6s infinite, rise 500ms ease 850ms backwards;
+    animation: bounce 2.4s ease-in-out 3.2s infinite, rise 500ms ease 2300ms backwards;
     transition: transform 180ms ease;
   }
   .cover-ballbtn:hover { transform: scale(1.12); animation-play-state: paused, running; }
@@ -318,7 +333,7 @@
     font-family: 'Alegreya', Georgia, serif; font-weight: 700; font-size: 13px; cursor: pointer;
   }
   .music-btn:hover { border-color: #F2EDE3; }
-  .cover-credit { margin-top: 14px; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-side-faint); animation: rise 500ms ease 950ms backwards; }
+  .cover-credit { margin-top: 14px; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(242,237,227,0.4); animation: rise 500ms ease 3000ms backwards; }
   /* the music switch — floats over everything, cover included */
   .music-fab {
     position: fixed; right: 18px; bottom: 18px; z-index: 130;
@@ -360,24 +375,32 @@
     .tlrow .who { display: none; }
     .item-head { flex-wrap: wrap; gap: 6px 12px; }
     .cardfoot { padding: 10px 16px; }
+    .cover { padding: 18px; }
+    .cover-inner { max-width: 100%; padding-top: 20vh; }
+    .cover-caption { font-size: 9px; letter-spacing: 0.16em; }
+    .cover-kicker { flex-wrap: wrap; font-size: 11px; letter-spacing: 0.2em; gap: 10px; }
+    .cover-kicker::before, .cover-kicker::after { width: 24px; }
+    .cover-title { font-size: clamp(40px, 15vw, 64px); }
+    .cover-sub { font-size: 15px; max-width: 100%; }
+    .cover-billing { letter-spacing: 0.14em; }
   }
 </style>
 </head>
 <body data-tab="spine">
 
 <div class="cover" id="cover" onclick="enterBoard()">
+  <div class="cover-photo"></div>
+  <div class="cover-bar top"></div>
+  <div class="cover-bar btm"></div>
   <div class="cover-inner">
-    <div class="cover-print" id="coverPrint">
-      <img src="cover.jpg" alt="Dan and Hans, back in the day" onerror="document.getElementById('coverPrint').style.display='none'">
-      <div class="print-cap">The original doubles team</div>
-    </div>
-    <div class="cover-kicker">September 2026 · Spain</div>
-    <h1 class="cover-title">Dan &amp; Hans<br>go to Spain</h1>
-    <div class="cover-dots"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-    <p class="cover-sub">A week of tennis at the Carlos Alcaraz academy, and the trip of a lifetime wrapped around it. The whole plan is one click away.</p>
+    <div class="cover-caption">Actual footage · the night the mission was accepted</div>
+    <div class="cover-kicker">September 2026 · Two men · One mission</div>
+    <h1 class="cover-title">We're going<br><span class="accent">to Spain.</span></h1>
+    <p class="cover-sub">Seven days at the Carlos Alcaraz academy. The trip of a lifetime wrapped around it. The whole plan is one click away.</p>
     <button class="cover-ballbtn" aria-label="Enter the board"><span>¡Vamos!</span></button>
+    <div class="cover-billing">Starring Hans and Dan · Soundtrack by Kenny Loggins · Based on a true decision</div>
     <div><button class="music-btn" id="musicBtn" onclick="playMusic(event)">♪ play the music</button></div>
-    <div class="cover-credit">Spanish Romance · trad. · Jim Greeninger</div>
+    <div class="cover-credit">Board music: Spanish Romance · trad. · Jim Greeninger</div>
   </div>
 </div>
 <button class="music-fab" id="musicFab" onclick="toggleMusic(event)" aria-label="Music on or off">♪</button>
