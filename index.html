@@ -887,38 +887,37 @@
 </div>
 
 <script>
-  // Spanish guitar, synthesized live — a plucked-string flourish on the way in.
-  let AC = null;
+  // A soft Spanish-guitar phrase on the way in. Deterministic oscillator plucks,
+  // no feedback loops, and a hard master volume cap — gentle by construction.
+  let AC = null, MASTER = null;
   function pluck(freq, when, dur, vol) {
-    const sr = AC.sampleRate;
-    const noise = AC.createBufferSource();
-    const burst = AC.createBuffer(1, Math.floor(sr * 0.02), sr);
-    const d = burst.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    noise.buffer = burst;
-    const delay = AC.createDelay(1); delay.delayTime.value = 1 / freq;
-    const fb = AC.createGain(); fb.gain.setValueAtTime(0.985, when);
-    fb.gain.linearRampToValueAtTime(0.55, when + dur);
-    const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4200;
-    const out = AC.createGain();
-    out.gain.setValueAtTime(vol, when);
-    out.gain.exponentialRampToValueAtTime(0.001, when + dur);
-    noise.connect(delay); delay.connect(lp); lp.connect(fb); fb.connect(delay);
-    delay.connect(out); out.connect(AC.destination);
-    noise.start(when); noise.stop(when + 0.02);
+    const osc = AC.createOscillator(); osc.type = 'triangle'; osc.frequency.value = freq;
+    const lp = AC.createBiquadFilter(); lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(2400, when);
+    lp.frequency.exponentialRampToValueAtTime(700, when + dur);
+    const g = AC.createGain();
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.exponentialRampToValueAtTime(vol, when + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+    osc.connect(lp); lp.connect(g); g.connect(MASTER);
+    osc.start(when); osc.stop(when + dur + 0.05);
   }
   function flourish() {
     try {
       AC = AC || new (window.AudioContext || window.webkitAudioContext)();
       if (AC.state === 'suspended') AC.resume();
+      if (!MASTER) {
+        MASTER = AC.createGain();
+        MASTER.gain.value = 0.16; // the ceiling — quiet, always
+        const comp = AC.createDynamicsCompressor();
+        MASTER.connect(comp); comp.connect(AC.destination);
+      }
       const t0 = AC.currentTime + 0.05;
-      // falling E-Phrygian run — the Spanish sound
-      const run = [659.25, 587.33, 523.25, 493.88, 440, 392, 349.23, 329.63];
-      run.forEach((f, i) => pluck(f, t0 + i * 0.11, 1.1, 0.32));
-      // rasgueado-style E major strum to land on
-      const chord = [164.81, 246.94, 329.63, 415.30, 493.88, 659.25];
-      const tC = t0 + run.length * 0.11 + 0.14;
-      chord.forEach((f, i) => pluck(f, tC + i * 0.035, 2.6, 0.38));
+      // a short falling Spanish phrase, then a soft E-major arpeggio to land on
+      const run = [659.25, 587.33, 523.25, 493.88];
+      run.forEach((f, i) => pluck(f, t0 + i * 0.13, 0.9, 0.5));
+      const chord = [329.63, 415.30, 493.88, 659.25];
+      chord.forEach((f, i) => pluck(f, t0 + run.length * 0.13 + 0.12 + i * 0.06, 1.6, 0.45));
     } catch (e) { /* no audio, no problem — the door still opens */ }
   }
   function enterBoard() {
