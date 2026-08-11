@@ -319,6 +319,19 @@
   }
   .music-btn:hover { border-color: #F2EDE3; }
   .cover-credit { margin-top: 14px; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-side-faint); animation: rise 500ms ease 950ms backwards; }
+  /* the music switch — floats over everything, cover included */
+  .music-fab {
+    position: fixed; right: 18px; bottom: 18px; z-index: 130;
+    width: 46px; height: 46px; border-radius: 50%;
+    background: var(--cream); color: #F2EDE3; border: 2px solid var(--frame);
+    font-size: 19px; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    transition: opacity 200ms ease, transform 150ms ease;
+  }
+  .music-fab:hover { transform: scale(1.1); }
+  .music-fab.off { opacity: 0.45; }
+  .music-fab.off::after { content: ''; position: absolute; width: 30px; height: 2px; background: #F2EDE3; transform: rotate(-45deg); border-radius: 2px; }
 
   /* phone layout — the board in your hand, mid-trip */
   @media (max-width: 820px) {
@@ -364,10 +377,11 @@
     <p class="cover-sub">A week of tennis at the Carlos Alcaraz academy, and the trip of a lifetime wrapped around it. The whole plan is one click away.</p>
     <button class="cover-ballbtn" aria-label="Enter the board"><span>¡Vamos!</span></button>
     <div><button class="music-btn" id="musicBtn" onclick="playMusic(event)">♪ play the music</button></div>
-    <div class="cover-credit">Asturias · Isaac Albéniz</div>
+    <div class="cover-credit">Spanish Romance · trad. · Jim Greeninger</div>
   </div>
 </div>
-<audio id="coverMusic" src="asturias.m4a" loop preload="auto"></audio>
+<button class="music-fab" id="musicFab" onclick="toggleMusic(event)" aria-label="Music on or off">♪</button>
+<audio id="coverMusic" src="romance.m4a" loop preload="auto"></audio>
 
 <div class="app">
 
@@ -898,35 +912,45 @@
 </div>
 
 <script>
-  // Asturias (Albéniz) plays low on the cover only — public-domain recording (Musopen).
-  // Browsers may block autoplay with sound; if so, a small play button appears.
+  // Spanish Romance (CC0 recording, Jim Greeninger) plays low through the whole board.
+  // The floating note button turns it off and on; browsers that block autoplay
+  // get a play button on the cover, and the ¡Vamos! click starts it too.
   const music = document.getElementById('coverMusic');
+  const fab = document.getElementById('musicFab');
+  let userMuted = false;
+  function updateFab() { fab.classList.toggle('off', !music || music.paused); }
+  music.addEventListener('play', updateFab);
+  music.addEventListener('pause', updateFab);
   function playMusic(ev) {
     if (ev) ev.stopPropagation();
-    music.volume = 0.22;
+    userMuted = false;
+    music.volume = 0.2;
     music.play();
     const b = document.getElementById('musicBtn');
     if (b) b.style.display = 'none';
   }
-  if (music && document.getElementById('cover') && !location.hash) {
-    music.volume = 0.22;
+  function toggleMusic(ev) {
+    if (ev) ev.stopPropagation();
+    if (music.paused) { userMuted = false; music.volume = 0.2; music.play(); }
+    else { userMuted = true; music.pause(); }
+    const b = document.getElementById('musicBtn');
+    if (b) b.style.display = 'none';
+  }
+  if (music && !location.hash) {
+    music.volume = 0.2;
     const attempt = music.play();
     if (attempt) attempt.catch(() => {
+      updateFab();
       const b = document.getElementById('musicBtn');
       if (b && document.getElementById('cover')) b.style.display = 'inline-flex';
     });
   }
-  function fadeOutMusic() {
-    if (!music || music.paused) return;
-    const fade = setInterval(() => {
-      music.volume = Math.max(0, music.volume - 0.025);
-      if (music.volume <= 0.002) { music.pause(); clearInterval(fade); }
-    }, 60);
-  }
+  updateFab();
   function enterBoard() {
     const c = document.getElementById('cover');
     if (!c) return;
-    fadeOutMusic();
+    // entering is a real click, so a blocked autoplay can start here — unless they said no
+    if (music.paused && !userMuted) { music.volume = 0.2; music.play(); }
     c.classList.add('gone');
     setTimeout(() => c.remove(), 600);
   }
