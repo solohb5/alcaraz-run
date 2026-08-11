@@ -391,7 +391,7 @@
   <div class="cover-bar top"></div>
   <div class="cover-bar btm"></div>
   <div class="cover-inner">
-    <div class="cover-kicker">September 2026 · Two men · One mission</div>
+    <div class="cover-kicker">September 2026</div>
     <h1 class="cover-title">We're going<br><span class="accent">to Spain.</span></h1>
     <button class="cover-ballbtn" aria-label="Enter the board"><span>¡Vamos!</span></button>
     <div><button class="cover-loud" id="loudBtn" onclick="playLoud(event)">🔊 Play it loud</button></div>
@@ -1035,7 +1035,7 @@
     const b = document.getElementById('musicBtn');
     if (b) b.style.display = 'none';
   }
-  if (music && !location.hash) {
+  function attemptGuitar() {
     music.volume = 0.2;
     const attempt = music.play();
     if (attempt) attempt.catch(() => {
@@ -1043,6 +1043,23 @@
       const b = document.getElementById('musicBtn');
       if (b && document.getElementById('cover')) b.style.display = 'inline-flex';
     });
+  }
+  // Hans's ask (8/11): open loud if the browser allows it. Most block sound-on
+  // autoplay — then we fall back to the muted loop and the guitar gets its turn.
+  const coverVid = document.getElementById('coverVideo');
+  if (!location.hash && coverVid) {
+    coverVid.muted = false; coverVid.volume = 1;
+    const loudTry = coverVid.play();
+    if (loudTry) loudTry.then(() => {
+      const b = document.getElementById('loudBtn');
+      if (b) b.textContent = '🔇 Okay, back to the guitar';
+    }).catch(() => {
+      coverVid.muted = true;
+      coverVid.play();
+      attemptGuitar();
+    });
+  } else if (music && !location.hash) {
+    attemptGuitar();
   }
   updateFab();
   // the cover video ships with its real audio — muted until a human asks for it.
